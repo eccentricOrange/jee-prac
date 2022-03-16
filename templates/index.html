@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible"
+        content="IE=edge">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+    <title>JEE Practice</title>
+</head>
+
+<body>
+    <form method="get" action="/start" onload="this.focus()">
+        <ol>
+            <li>
+                Choose an exam type.
+                <select name="test_type" required>
+                    <option value="mains" selected>JEE Mains</option>
+                    <option value="mains_old">JEE Mains (Old Pattern)</option>
+                    <option value="advanced">JEE Advanced</option>
+                    <option value="random">Random Test</option>
+                </select>
+            </li>
+
+            <li>
+                Number of numeric questions per subject.
+                <input type="number" name="number_of_numeric_questions" min="1" value="5" required>
+            </li>
+
+            <li>
+                Number of MCQ questions per subject.
+                <input type="number" name="number_of_mcq_questions" min="1" value="20" required>
+            </li>
+
+            <li>
+                Total duration / minutes.
+                <input type="number" name="duration" min="1" max="360" value="180" required>
+            </li>
+        </ol>
+
+        <input type="submit" value="Start Exam">
+    </form>
+</body>
+
+</html>
