@@ -1,20 +1,3 @@
-function create_palette(number_of_questions) {
-    let container = document.getElementById("palette").getElementsByTagName("form")[0];
-    let buttons = []
-
-    for (var i = 1; i < number_of_questions + 1; i++) {
-        var input = document.createElement("input");
-        input.setAttribute("type", "button");
-        input.setAttribute("name", i);
-        input.setAttribute("value", i);
-        input.setAttribute("id", i);
-
-        buttons.push(input);
-    }
-
-    return buttons;
-}
-
 async function get_url(url) {
     const response = await fetch(url);
     const json = await response.json();
@@ -22,36 +5,98 @@ async function get_url(url) {
     return json;
 }
 
-function main() {
-    get_palette();
-
+const PAPER_RULES = {
+    'mains': {
+        'physics_mcq': 20,
+        'chemistry_mcq': 20,
+        'mathematics_mcq': 20,
+        'physics_numeric': 5,
+        'chemistry_numeric': 5,
+        'mathematics_numeric': 5,
+        'duration': 180
+    },
+    'mains_old': {
+        'physics_mcq': 30,
+        'chemistry_mcq': 30,
+        'mathematics_mcq': 30,
+        'physics_numeric': 0,
+        'chemistry_numeric': 0,
+        'mathematics_numeric': 0,
+        'duration': 180
+    }
 }
 
-window.onload = main;
+function update_values() {
 
-function get_palette() {
-    const test_data = get_url('/get_test_data');
-    test_data.then(
-        function (data) {
-            console.log(data);
-            let total_questions = (data.number_of_numeric_questions + data.number_of_mcq_questions) * 3;
-            let buttons = create_palette(total_questions);
-            console.log(buttons);
-            set_palette(buttons);
+    form = document.getElementById("config_test");
+
+    const test_type = form.elements["test_type"].value;
+    if (test_type in PAPER_RULES) {
+        for (question in PAPER_RULES[test_type]) {
+            form.elements[question].value = PAPER_RULES[test_type][question];
         }
-    );
+    }
 }
-function set_palette(buttons) {
+
+function set_palette() {
     const questions_status = get_url('/get_questions_status');
     questions_status.then(
         function (data) {
             for (question in data) {
-                const current_button = data[question];
-                button = buttons[current_button.number - 1];
-                button.setAttribute("class", `question_button ${current_button.status}`);
-                document.getElementById(current_button.subject).appendChild(button);
+                // console.log(question);
+                let new_button = document.createElement('button');
+                new_button.className = `question_button ${data[question]['status']}`;
+                new_button.innerHTML = data[question]['number'];
+
+                document.getElementById(data[question]['subject']).appendChild(new_button);
             }
         }
     );
 }
 
+function clear_mcq() {
+    const radios = document.getElementsByName('question');
+    for (let i = 0; i < radios.length; i++) {
+        radios[i].checked = false;
+    }
+}
+
+function store_value() {
+    const url_params = new URLSearchParams(window.location.search);
+    const question_status = get_url(`/get_question_status?number=${url_params.get('number')}`);
+    question_status.then(
+        function (question_status) {
+            let value = null;
+            if (question_status["type"] == 'mcq') {
+                value = document.querySelector('input[name="question"]:checked').value
+            }
+
+            else if (question_status["type"] == 'numeric') {
+                value = document.getElementsByName('question')[0].value;
+            }
+
+            fetch(`/store_value?number=${url_params.get('number')}&value=${value}`);
+        }
+    );
+}
+
+function main() {
+    const question_status = get_url(`/get_question_status?number=${url_params.get('number')}`);
+    question_status.then(
+        function (question_status) {
+            if (question_status["type"] == 'mcq') {
+                clear_mcq();
+
+                if (question_status["value"] != null) {
+                    document.querySelector(`input[value=${question_status["value"]}]`).checked = true;
+                }
+            }
+
+            else if (question_status["type"] == 'numeric') {
+                document.getElementsByName('question')[0].value = question_status["value"];
+            }
+        }
+    )
+}
+
+window.onload = main;

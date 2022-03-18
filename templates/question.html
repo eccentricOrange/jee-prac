@@ -9,11 +9,11 @@
         content="width=device-width, initial-scale=1.0">
     <title>{{ q_no }}: {{ test_type }}</title>
     <link rel="stylesheet"
-        href="{{ url_for('static', filename='style.css') }}">
+        href="{{ url_for('static', filename='question_style.css') }}">
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </head>
 
-<body>
+<body onload="set_palette()">
     <h1>
         Question {{ q_no }}
     </h1>
@@ -37,16 +37,16 @@
 
     <div id="controls">
         <form action="/nav" method="get">
-            <button id="prev">
+            <button id="prev" value="prev">
                 Previous
             </button>
-            <button id="next">
+            <button id="next" value="next">
                 Next
             </button>
-            <button id="quit">
+            <button id="quit" value="quit">
                 Quit
             </button>
-            <button id="submit">
+            <button id="submit" value="submit">
                 Submit
             </button>
         </form>

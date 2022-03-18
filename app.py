@@ -5,31 +5,14 @@ app = Flask(__name__)
 
 questions_status = {}
 
-test_data = {
-    'number_of_numeric_questions': 0,
-    'number_of_mcq_questions': 0,
-    'duration': 0
-}
+test_data = {}
 
-new_question = {
+NEW_QUESTION = {
     'number': 0,
     'status': "unvisited",
     'value': None,
     'type': None,
     'subject': None
-}
-
-PAPER_RULES = {
-    'mains': {
-        'numeric': 5,
-        'mcq': 20,
-        'duration': 180
-    },
-    'mains_old': {
-        'numeric': 0,
-        'mcq': 30,
-        'duration': 180
-    }
 }
 
 SUBJECTS = [
@@ -38,90 +21,66 @@ SUBJECTS = [
     'mathematics'
 ]
 
+TYPES = [
+    'mcq',
+    'numeric'
+]
+
+def produce_list_of_questions(exam_data: dict):
+    questions = {}
+
+    question_number = 1
+    for subject_no, subject in enumerate(SUBJECTS, start=1):
+        for type_no, type in enumerate(TYPES, start=1):
+
+            for i in range(1, int(exam_data[f"{subject}_{type}"]) + 1):
+
+                question = NEW_QUESTION.copy()
+                question['number'] = question_number
+                question['subject'] = subject
+                question['type'] = type
+                questions[str(question_number)] = question
+                question_number += 1
+
+    return questions
+
+
 @app.route('/')
 def index():
     return render_template('index.html')
 
 @app.route('/start')
 def start():
-    global PAPER_RULES, test_data, questions_status
-    test_type = str(request.args.get('test_type'))
-    number_of_numeric_questions = int(str(request.args.get('number_of_numeric_questions')))
-    number_of_mcq_questions = int(str(request.args.get('number_of_mcq_questions')))
-    duration = int(str(request.args.get('duration')))
-
-    test_data = {
-        'number_of_numeric_questions': number_of_numeric_questions,
-        'number_of_mcq_questions': number_of_mcq_questions,
-        'duration': duration
-    }
-
-    questions_status = initialize_paper(test_type, test_data)
-
+    global test_data, questions_status
+    test_data = request.args.to_dict()
+    questions_status = produce_list_of_questions(test_data)
     return redirect('/question?number=1')
-
-@app.route('/get_question_by_number')
-def get_question_by_number():
-    global questions_status
-    question_number = int(str(request.args.get('question_number')))
-    return dumps(questions_status[question_number])
 
 @app.route('/get_questions_status')
 def get_questions_status():
-    global questions_status
     return dumps(questions_status)
 
-@app.route('/get_test_data')
-def get_test_data():
-    global test_data
-    return dumps(test_data)
+@app.route('/get_question_status')
+def get_question_status():
+    return dumps(questions_status[request.args.get('number')])
 
 @app.route('/question')
 def question():
-    number = f"q{request.args.get('number')}"
+    global questions_status
+    number = str(request.args.get('number'))
+    question = questions_status[number]
+    return render_template(f'{question["type"]}.html', q_no=question['number'], q_type=question["type"])
 
-    if number in questions_status:
-        if questions_status[number]['type'] == 'numeric':
-            return render_template('numeric.html')
-        
-        if questions_status[number]['type'] == 'mcq':
-            return render_template('mcq.html')
-
-    return render_template('error.html')
-
-def initialize_paper(test_type, test_data):
-    questions_status= {}
-    
-    if test_type in PAPER_RULES:
-        test_data['number_of_numeric_questions'] = PAPER_RULES[test_type]['numeric']
-        test_data['number_of_mcq_questions'] = PAPER_RULES[test_type]['mcq']
-        test_data['duration'] = PAPER_RULES[test_type]['duration']
-
-    for subject_counter, subject in enumerate(SUBJECTS):
-
-        subject_increment = (test_data['number_of_mcq_questions'] + test_data['number_of_numeric_questions']) * subject_counter
-
-        for question_counter in range(1, test_data['number_of_mcq_questions'] + 1):
-            current_question_number = question_counter + subject_increment
-            current_question_number_index = f"q{current_question_number}"
-
-            questions_status[current_question_number_index] = new_question.copy()
-            questions_status[current_question_number_index]['type'] = 'mcq'
-            questions_status[current_question_number_index]['subject'] = subject
-            questions_status[current_question_number_index]['number'] = current_question_number
-
-        for question_counter in range(1, test_data['number_of_numeric_questions'] + 1):
-            current_question_number = question_counter + test_data['number_of_mcq_questions'] + subject_increment
-            current_question_number_index = f"q{current_question_number}"
-            questions_status[current_question_number_index] = new_question.copy()
-            questions_status[current_question_number_index]['type'] = 'numeric'
-            questions_status[current_question_number_index]['subject'] = subject
-            questions_status[current_question_number_index]['number'] = current_question_number
-
-    return questions_status
+@app.route('/store_value')
+def store_value():
+    global questions_status
+    number = str(request.args.get('number'))
+    value = request.args.get('value')
+    questions_status[number]['value'] = value
+    return dumps({'status': 'success'}), 200
 
 def test():
-    print(dumps(initialize_paper('mains', test_data), indent=4))
+    pass
 
 if __name__ == '__main__':
     test()
