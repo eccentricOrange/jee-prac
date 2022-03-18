@@ -9,7 +9,9 @@ test_data = {}
 
 NEW_QUESTION = {
     'number': 0,
-    'status': "unvisited",
+    'visit': "unvisited",
+    'answer': "unanswered",
+    'mark': "unmarked",
     'value': None,
     'type': None,
     'subject': None
@@ -68,6 +70,10 @@ def get_question_status():
 def question():
     global questions_status
     number = str(request.args.get('number'))
+
+    if questions_status[number]['visit'] == "unvisited":
+        questions_status[number]['visit'] = "visited"
+
     question = questions_status[number]
     return render_template(f'{question["type"]}.html', q_no=question['number'], q_type=question["type"])
 
@@ -77,6 +83,20 @@ def store_value():
     number = str(request.args.get('number'))
     value = request.args.get('value')
     questions_status[number]['value'] = value
+    return dumps({'status': 'success'}), 200
+
+@app.route('/unmark')
+def mark():
+    global questions_status
+    number = str(request.args.get('number'))
+    questions_status[number]['mark'] = "unmarked"
+    return dumps({'status': 'success'}), 200
+
+@app.route('/mark')
+def unmark():
+    global questions_status
+    number = str(request.args.get('number'))
+    questions_status[number]['mark'] = "marked"
     return dumps({'status': 'success'}), 200
 
 def test():

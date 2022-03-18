@@ -13,7 +13,7 @@
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </head>
 
-<body onload="set_palette()">
+<body onload="init_question()">
     <h1>
         Question {{ q_no }}
     </h1>
@@ -24,32 +24,36 @@
 
     <div id="palette">
 
-        <form>
-            <div class="subject"
-                id="physics"></div>
-            <div class="subject"
-                id="chemistry"></div>
-            <div class="subject"
-                id="mathematics"></div>
-        </form>
+        <div class="subject"
+            id="physics"></div>
+        <div class="subject"
+            id="chemistry"></div>
+        <div class="subject"
+            id="mathematics"></div>
 
     </div>
 
     <div id="controls">
-        <form action="/nav" method="get">
-            <button id="prev" value="prev">
-                Previous
-            </button>
-            <button id="next" value="next">
-                Next
-            </button>
-            <button id="quit" value="quit">
-                Quit
-            </button>
-            <button id="submit" value="submit">
-                Submit
-            </button>
-        </form>
+        <button id="previous"
+            onclick="previous()">
+            Previous
+        </button>
+        <button id="next"
+            onclick="next()">
+            Next
+        </button>
+        <button id="mark"
+            onclick="mark()">
+            Mark
+        </button>
+        <button id="quit"
+            onclick="quit()">
+            Quit
+        </button>
+        <button id="submit"
+            onclick="submit()">
+            Submit
+        </button>
     </div>
 
 

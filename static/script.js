@@ -1,10 +1,3 @@
-async function get_url(url) {
-    const response = await fetch(url);
-    const json = await response.json();
-
-    return json;
-}
-
 const PAPER_RULES = {
     'mains': {
         'physics_mcq': 20,
@@ -26,8 +19,15 @@ const PAPER_RULES = {
     }
 }
 
-function update_values() {
+async function get_url(url) {
+    const response = await fetch(url);
+    const json = await response.json();
 
+    return json;
+}
+
+
+function update_values() {
     form = document.getElementById("config_test");
 
     const test_type = form.elements["test_type"].value;
@@ -38,15 +38,51 @@ function update_values() {
     }
 }
 
+
+function clear_mcq() {
+    let radios = document.getElementsByName('question');
+    for (let i = 0; i < radios.length; i++) {
+        radios[i].checked = false;
+    }
+
+    store_value();
+}
+
+function store_value() {
+    question_status.then(
+        function (question_status) {
+            let value = null;
+            if (question_status["type"] == 'mcq') {
+                const options = document.querySelector('input[name="question"]:checked');
+                if (options != null) {
+                    value = options.value
+                }
+
+                else {
+                    value = null;
+                }
+            }
+
+            else if (question_status["type"] == 'numeric') {
+                value = document.getElementsByName('question')[0].value;
+            }
+
+            fetch(`/store_value?number=${current_number}&value=${value}`);
+        }
+    );
+}
+
 function set_palette() {
-    const questions_status = get_url('/get_questions_status');
     questions_status.then(
         function (data) {
             for (question in data) {
-                // console.log(question);
                 let new_button = document.createElement('button');
-                new_button.className = `question_button ${data[question]['status']}`;
+                new_button.className = `question_button ${data[question]['visit']} ${data[question]['answer']} ${data[question]['mark']}`;
+                new_button.id = `${question}`;
                 new_button.innerHTML = data[question]['number'];
+                new_button.onclick = function () {
+                    window.location.href = `/question?number=${new_button.id}`;
+                }
 
                 document.getElementById(data[question]['subject']).appendChild(new_button);
             }
@@ -54,49 +90,97 @@ function set_palette() {
     );
 }
 
-function clear_mcq() {
-    const radios = document.getElementsByName('question');
-    for (let i = 0; i < radios.length; i++) {
-        radios[i].checked = false;
-    }
-}
-
-function store_value() {
-    const url_params = new URLSearchParams(window.location.search);
-    const question_status = get_url(`/get_question_status?number=${url_params.get('number')}`);
+function set_value_from_server() {
     question_status.then(
-        function (question_status) {
-            let value = null;
-            if (question_status["type"] == 'mcq') {
-                value = document.querySelector('input[name="question"]:checked').value
+        function (data) {
+            if (data["type"] == 'mcq') {
+                clear_mcq();
+                if ((data["value"] != 'null') && (data["value"] != null)) {
+                    document.querySelector(`input[value=${data["value"]}]`).checked = true;
+                }
             }
 
-            else if (question_status["type"] == 'numeric') {
-                value = document.getElementsByName('question')[0].value;
+            else if (data["type"] == 'numeric') {
+                document.getElementsByName('question')[0].value = data["value"];
             }
-
-            fetch(`/store_value?number=${url_params.get('number')}&value=${value}`);
         }
     );
 }
 
-function main() {
-    const question_status = get_url(`/get_question_status?number=${url_params.get('number')}`);
-    question_status.then(
-        function (question_status) {
-            if (question_status["type"] == 'mcq') {
-                clear_mcq();
-
-                if (question_status["value"] != null) {
-                    document.querySelector(`input[value=${question_status["value"]}]`).checked = true;
-                }
-            }
-
-            else if (question_status["type"] == 'numeric') {
-                document.getElementsByName('question')[0].value = question_status["value"];
-            }
-        }
-    )
+function next() {
+    const next_number = parseInt(current_number) + 1;
+    window.location.href = `/question?number=${next_number}`;
 }
 
-window.onload = main;
+function previous() {
+    const previous_number = parseInt(current_number) - 1;
+    window.location.href = `/question?number=${previous_number}`;
+}
+
+
+function disable_previous() {
+    if (current_number == 1) {
+        document.getElementById('previous').disabled = true;
+    }
+
+    else {
+        document.getElementById('previous').disabled = false;
+    }
+}
+
+function set_mark() {
+    question_status.then(
+        function (data) {
+            if (data["mark"] == 'marked') {
+                document.getElementById('mark').innerHTML = 'Unmark';
+            }
+
+            else {
+                document.getElementById('mark').innerHTML = 'Mark';
+            }
+        }
+    );
+}
+
+function mark() {
+    question_status.then(
+        function (data) {
+            if (data["mark"] == 'marked') {
+                fetch(`/unmark?number=${current_number}`);
+                document.getElementById('mark').innerHTML = 'Mark';
+            }
+
+            else {
+                fetch(`/mark?number=${current_number}`);
+                document.getElementById('mark').innerHTML = 'Unmark';
+            }
+        }
+    );
+    question_status = get_url(`/get_question_status?number=${current_number}`);
+}
+
+function disable_next() {
+    questions_status.then(
+        function (data) {
+            if (current_number == Object.keys(data).length) {
+                document.getElementById('next').disabled = true;
+            }
+
+            else {
+                document.getElementById('next').disabled = false;
+            }
+        }
+    );
+}
+
+function init_question() {
+    url_params = new URLSearchParams(window.location.search);
+    current_number = parseInt(url_params.get('number'));
+    questions_status = get_url('/get_questions_status');
+    question_status = get_url(`/get_question_status?number=${current_number}`);
+    set_palette()
+    set_value_from_server();
+    disable_previous();
+    disable_next();
+    set_mark();
+}
