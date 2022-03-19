@@ -180,8 +180,21 @@ function disable_next() {
     );
 }
 
-function submit() {
-    window.location.href = '/submit';
+function submit(popup) {
+    if (popup) {
+        get_url('/get_counts').then(
+            function (data) {
+
+                if (window.confirm(`You have attempted ${data['answered']} questions, ${data['marked']} questions, are marked and ${data['unanswered']} questions are unanswered. Are you sure you want to submit?`)) {
+                    window.location.href = '/submit';
+                }
+            }
+        );
+    }
+
+    else {
+        window.location.href = '/submit';
+    }
 }
 
 
@@ -189,14 +202,14 @@ function clock() {
     time -= 1;
     var time_remaining = new Date(null)
     time_remaining.setUTCSeconds(time);
-    document.getElementById('timer').innerHTML = `${time_remaining.getUTCHours()}:${time_remaining.getUTCMinutes()}:${time_remaining.getUTCSeconds()}`;
+    document.getElementById('timer').innerHTML = `${time_remaining.getUTCHours().toString().padStart(2, '0')}:${time_remaining.getUTCMinutes().toString().padStart(2, '0')}:${time_remaining.getUTCSeconds().toString().padStart(2, '0')}`;
     delete time_remaining;
     auto_submit();
 }
 
 function auto_submit() {
-    if (time == 0) {
-        submit();
+    if (time <= 0) {
+        submit(false);
     }
 }
 
@@ -224,5 +237,12 @@ function new_exam() {
 }
 
 function quit() {
-    window.location.href = '/quit';
+    get_url('/get_counts').then(
+        function (data) {
+
+            if (window.confirm(`You have attempted ${data['answered']} questions, ${data['marked']} questions, are marked and ${data['unanswered']} questions are unanswered. Are you sure you want to quit?`)) {
+                window.location.href = '/quit';
+            }
+        }
+    );
 }

@@ -1,18 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "template.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible"
-        content="IE=edge">
-    <meta name="viewport"
-        content="width=device-width, initial-scale=1.0">
-    <title>JEE Practice</title>
-    <link rel="stylesheet"
-        href="{{ url_for('static', filename='style.css') }}">
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
-</head>
+{% block title %}
+JEE Practice Portal
+{% endblock %}
 
+{% block body %}
 <body>
     <form method="get"
         id="config_test"
@@ -93,5 +85,4 @@
             value="Start Exam">
     </form>
 </body>
-
-</html>
+{% endblock %}
