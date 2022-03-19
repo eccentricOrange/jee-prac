@@ -26,6 +26,13 @@ async function get_url(url) {
     return json;
 }
 
+function post(url, data = null) {
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", url, true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.send(JSON.stringify(data));
+}
+
 
 function update_values() {
     form = document.getElementById("config_test");
@@ -67,7 +74,7 @@ function store_value() {
                 value = document.getElementsByName('question')[0].value;
             }
 
-            fetch(`/store_value?number=${current_number}&value=${value}`);
+            post(`/store_value?number=${current_number}&value=${value}`);
         }
     );
 }
@@ -146,12 +153,12 @@ function mark() {
     question_status.then(
         function (data) {
             if (data["mark"] == 'marked') {
-                fetch(`/unmark?number=${current_number}`);
+                post(`/unmark?number=${current_number}`);
                 document.getElementById('mark').innerHTML = 'Mark';
             }
 
             else {
-                fetch(`/mark?number=${current_number}`);
+                post(`/mark?number=${current_number}`);
                 document.getElementById('mark').innerHTML = 'Unmark';
             }
         }
@@ -173,14 +180,49 @@ function disable_next() {
     );
 }
 
+function submit() {
+    window.location.href = '/submit';
+}
+
+
+function clock() {
+    time -= 1;
+    var time_remaining = new Date(null)
+    time_remaining.setUTCSeconds(time);
+    document.getElementById('timer').innerHTML = `${time_remaining.getUTCHours()}:${time_remaining.getUTCMinutes()}:${time_remaining.getUTCSeconds()}`;
+    delete time_remaining;
+    auto_submit();
+}
+
+function auto_submit() {
+    if (time == 0) {
+        submit();
+    }
+}
+
 function init_question() {
     url_params = new URLSearchParams(window.location.search);
     current_number = parseInt(url_params.get('number'));
     questions_status = get_url('/get_questions_status');
     question_status = get_url(`/get_question_status?number=${current_number}`);
+    get_url('/get_remaining_time').then(
+        function (data) {
+            time = data.remaining_time;
+        }
+    )
     set_palette()
     set_value_from_server();
     disable_previous();
     disable_next();
     set_mark();
+    setInterval(clock, 1000);
+}
+
+
+function new_exam() {
+    window.location.href = '/';
+}
+
+function quit() {
+    window.location.href = '/quit';
 }

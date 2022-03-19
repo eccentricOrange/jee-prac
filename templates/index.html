@@ -9,17 +9,22 @@
         content="width=device-width, initial-scale=1.0">
     <title>JEE Practice</title>
     <link rel="stylesheet"
-        href="{{ url_for('static', filename='config_style.css') }}">
+        href="{{ url_for('static', filename='style.css') }}">
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </head>
 
 <body>
-    <form method="get" id="config_test" action="/start">
+    <form method="get"
+        id="config_test"
+        action="/start">
         <ol>
             <li>
                 Choose an exam type.
-                <select name="test_type" required onchange="update_values()">
-                    <option value="mains" selected>JEE Mains</option>
+                <select name="test_type"
+                    required
+                    onchange="update_values()">
+                    <option value="mains"
+                        selected>JEE Mains</option>
                     <option value="mains_old">JEE Mains (Old Pattern)</option>
                     <option value="random">Random Test</option>
                 </select>
@@ -27,46 +32,65 @@
 
             <li>
                 Enter data for Physics.
-                
+
 
                 Number of MCQ questions
-                <input type="number" name="physics_mcq" value="20" required>
-                
+                <input type="number"
+                    name="physics_mcq"
+                    value="20"
+                    required>
+
                 Number of numeric questions
-                <input type="number" name="physics_numeric" value="5">
+                <input type="number"
+                    name="physics_numeric"
+                    value="5">
             </li>
 
             <li>
                 Enter data for Chemistry.
-                
+
 
                 Number of MCQ questions
-                <input type="number" name="chemistry_mcq" value="20" required>
-                
+                <input type="number"
+                    name="chemistry_mcq"
+                    value="20"
+                    required>
+
                 Number of numeric questions
-                <input type="number" name="chemistry_numeric" value="5">
+                <input type="number"
+                    name="chemistry_numeric"
+                    value="5">
             </li>
 
             <li>
                 Enter data for Mathematics.
-                
+
 
                 Number of MCQ questions
-                <input type="number" name="mathematics_mcq" value="20" required>
-                
+                <input type="number"
+                    name="mathematics_mcq"
+                    value="20"
+                    required>
+
                 Number of numeric questions
-                <input type="number" name="mathematics_numeric" value="5">
+                <input type="number"
+                    name="mathematics_numeric"
+                    value="5">
             </li>
 
             <li>
                 Enter the duration of the test in minutes.
 
-                <input type="number" name="duration" value="180" required>
+                <input type="number"
+                    name="duration"
+                    value="180"
+                    required>
             </li>
-            
+
         </ol>
 
-        <input type="submit" value="Start Exam">
+        <input type="submit"
+            value="Start Exam">
     </form>
 </body>
 

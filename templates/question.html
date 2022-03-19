@@ -9,7 +9,7 @@
         content="width=device-width, initial-scale=1.0">
     <title>{{ q_no }}: {{ test_type }}</title>
     <link rel="stylesheet"
-        href="{{ url_for('static', filename='question_style.css') }}">
+        href="{{ url_for('static', filename='style.css') }}">
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </head>
 
@@ -35,26 +35,33 @@
 
     <div id="controls">
         <button id="previous"
+            class="controls"
             onclick="previous()">
             Previous
         </button>
         <button id="next"
+            class="controls"
             onclick="next()">
             Next
         </button>
         <button id="mark"
+            class="controls"
             onclick="mark()">
             Mark
         </button>
         <button id="quit"
+            class="controls"
             onclick="quit()">
             Quit
         </button>
         <button id="submit"
+            class="controls"
             onclick="submit()">
             Submit
         </button>
     </div>
+
+    <div id="timer"></div>
 
 
 </body>
