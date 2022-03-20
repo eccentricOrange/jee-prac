@@ -59,14 +59,28 @@ function store_value() {
     question_status.then(
         function (question_status) {
             let value = null;
+
             if (question_status["type"] == 'mcq') {
                 const options = document.querySelector('input[name="question"]:checked');
+
+                let palette_button = document.getElementById(`${current_number}`);
+
                 if (options != null) {
                     value = options.value
+
+                    if (palette_button.classList.contains('unanswered')) {
+                        palette_button.classList.remove('unanswered');
+                        palette_button.classList.add('answered');
+                    }
                 }
 
                 else {
                     value = null;
+
+                    if (palette_button.classList.contains('answered')) {
+                        palette_button.classList.remove ('answered');
+                        palette_button.classList.add('unanswered');
+                    }
                 }
             }
 
@@ -75,6 +89,11 @@ function store_value() {
             }
 
             post(`/store_value?number=${current_number}&value=${value}`);
+        }
+    );
+    get_url('/get_counts').then(
+        function (data) {
+            set_statistics(data);
         }
     );
 }
@@ -152,18 +171,31 @@ function set_mark() {
 function mark() {
     question_status.then(
         function (data) {
+            let palette_button = document.getElementById(`${current_number}`);
+
             if (data["mark"] == 'marked') {
                 post(`/unmark?number=${current_number}`);
                 document.getElementById('mark').innerHTML = 'Mark';
+
+                palette_button.classList.remove('marked');
+                palette_button.classList.add('unmarked');
             }
 
             else {
                 post(`/mark?number=${current_number}`);
                 document.getElementById('mark').innerHTML = 'Unmark';
+
+                palette_button.classList.remove('unmarked');
+                palette_button.classList.add('marked');
             }
         }
     );
     question_status = get_url(`/get_question_status?number=${current_number}`);
+    get_url('/get_counts').then(
+        function (data) {
+            set_statistics(data);
+        }
+    );
 }
 
 function disable_next() {
@@ -185,7 +217,7 @@ function submit(popup) {
         get_url('/get_counts').then(
             function (data) {
 
-                if (window.confirm(`You have attempted ${data['answered']} questions, ${data['marked']} questions, are marked and ${data['unanswered']} questions are unanswered. Are you sure you want to submit?`)) {
+                if (window.confirm(`You have attempted ${data['answered']} questions, ${data['marked']} questions are marked, and ${data['unanswered']} questions are unanswered. Are you sure you want to submit?`)) {
                     window.location.href = '/submit';
                 }
             }
@@ -200,11 +232,15 @@ function submit(popup) {
 
 function clock() {
     time -= 1;
-    var time_remaining = new Date(null)
+    update_timer_UI();
+    auto_submit();
+}
+
+function update_timer_UI() {
+    var time_remaining = new Date(null);
     time_remaining.setUTCSeconds(time);
     document.getElementById('timer').innerHTML = `${time_remaining.getUTCHours().toString().padStart(2, '0')}:${time_remaining.getUTCMinutes().toString().padStart(2, '0')}:${time_remaining.getUTCSeconds().toString().padStart(2, '0')}`;
     delete time_remaining;
-    auto_submit();
 }
 
 function auto_submit() {
@@ -221,6 +257,7 @@ function init_question() {
     get_url('/get_remaining_time').then(
         function (data) {
             time = data.remaining_time;
+            update_timer_UI();
         }
     )
     set_palette()
@@ -229,6 +266,12 @@ function init_question() {
     disable_next();
     set_mark();
     setInterval(clock, 1000);
+}
+
+function set_statistics (data) {
+    document.getElementById('answered_count').innerHTML = data['answered'];
+    document.getElementById('marked_count').innerHTML = data['marked'];
+    document.getElementById('unanswered_count').innerHTML = data['unanswered'];
 }
 
 
@@ -240,7 +283,7 @@ function quit() {
     get_url('/get_counts').then(
         function (data) {
 
-            if (window.confirm(`You have attempted ${data['answered']} questions, ${data['marked']} questions, are marked and ${data['unanswered']} questions are unanswered. Are you sure you want to quit?`)) {
+            if (window.confirm(`You have attempted ${data['answered']} questions, ${data['marked']} questions are marked, and ${data['unanswered']} questions are unanswered. Are you sure you want to quit?`)) {
                 window.location.href = '/quit';
             }
         }

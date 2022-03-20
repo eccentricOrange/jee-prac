@@ -5,10 +5,13 @@
 {% endblock %}
 
 {% block body %}
+
 <body onload="init_question()">
     <h1>
         Question {{ q_no }}
     </h1>
+
+    <div id="timer"></div>
 
     <div id="question">
         {% block question %}{% endblock %}
@@ -22,6 +25,20 @@
             id="chemistry"></div>
         <div class="subject"
             id="mathematics"></div>
+        <table id="statistics">
+            <tr>
+                <th>Answered</th>
+                <td id="answered_count"></td>
+            </tr>
+            <tr>
+                <th>Unanswered</th>
+                <td id="unanswered_count"></td>
+            </tr>
+            <tr>
+                <th>Marked</th>
+                <td id="marked_count"></td>
+            </tr>
+        </table>
 
     </div>
 
@@ -53,7 +70,6 @@
         </button>
     </div>
 
-    <div id="timer"></div>
 
 </body>
 {% endblock %}

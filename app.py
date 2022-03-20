@@ -31,14 +31,15 @@ TYPES = [
     'numeric'
 ]
 
-FOLDER = Path(__file__).parent
-SCHEMA_PATH = FOLDER / 'schema.sql'
+SCHEMA_PATH = Path(__file__).parent / 'schema.sql'
+FOLDER = Path().home() / '.jee-prac'
 DB_PATH = FOLDER / 'jee.db'
 START_TIME = datetime.now()
 SUBMITTED = False
 
 
 def setup_storage():
+    FOLDER.mkdir(exist_ok=True, parents=True)
     with connect(DB_PATH) as connection:
         with open(SCHEMA_PATH, 'r') as f:
             connection.executescript(f.read())
@@ -148,7 +149,15 @@ def store_value():
         if questions_status:
             number = str(request.args.get('number'))
             value = request.args.get('value')
-            questions_status[number]['value'] = value if value != "null" else None
+            
+            if value == "null" or not value:
+                questions_status[number]['answer'] = "unanswered"
+                questions_status[number]['value'] = None
+            
+            else:
+                questions_status[number]['answer'] = "answered"
+                questions_status[number]['value'] = value
+
             return dumps({'status': 'success'}), HTTPStatus.OK
 
         return dumps({}), HTTPStatus.NOT_FOUND

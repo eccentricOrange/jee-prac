@@ -5,16 +5,21 @@ JEE Practice Portal
 {% endblock %}
 
 {% block body %}
+
 <body>
+    <h1>
+        Configure the exam
+    </h1>
     <form method="get"
         id="config_test"
         action="/start">
         <ol>
             <li>
-                Choose an exam type.
+                <h2>Choose an exam type.</h2>
                 <select name="test_type"
                     required
-                    onchange="update_values()">
+                    onchange="update_values()"
+                    class="field">
                     <option value="mains"
                         selected>JEE Mains</option>
                     <option value="mains_old">JEE Mains (Old Pattern)</option>
@@ -23,66 +28,80 @@ JEE Practice Portal
             </li>
 
             <li>
-                Enter data for Physics.
+                <h2>Enter data for Physics.</h2>
 
 
-                Number of MCQ questions
-                <input type="number"
-                    name="physics_mcq"
-                    value="20"
-                    required>
+                <div class="field">
+                    Number of MCQ questions
+                    <input type="number"
+                        name="physics_mcq"
+                        value="20"
+                        required>
+                </div>
 
-                Number of numeric questions
-                <input type="number"
-                    name="physics_numeric"
-                    value="5">
+                <div class="field">
+                    Number of numeric questions
+                    <input type="number"
+                        name="physics_numeric"
+                        value="5">
+                </div>
             </li>
 
             <li>
-                Enter data for Chemistry.
+                <h2>Enter data for Chemistry.</h2>
 
 
-                Number of MCQ questions
-                <input type="number"
-                    name="chemistry_mcq"
-                    value="20"
-                    required>
+                <div class="field">
+                    Number of MCQ questions
+                    <input type="number"
+                        name="chemistry_mcq"
+                        value="20"
+                        required>
+                </div>
 
-                Number of numeric questions
-                <input type="number"
-                    name="chemistry_numeric"
-                    value="5">
+                <div class="field">
+                    Number of numeric questions
+                    <input type="number"
+                        name="chemistry_numeric"
+                        value="5">
+                </div>
             </li>
 
             <li>
-                Enter data for Mathematics.
+                <h2>Enter data for Mathematics.</h2>
 
 
-                Number of MCQ questions
-                <input type="number"
-                    name="mathematics_mcq"
-                    value="20"
-                    required>
+                <div class="field">
+                    Number of MCQ questions
+                    <input type="number"
+                        name="mathematics_mcq"
+                        value="20"
+                        required>
+                </div>
 
-                Number of numeric questions
-                <input type="number"
-                    name="mathematics_numeric"
-                    value="5">
+                <div class="field">
+                    Number of numeric questions
+                    <input type="number"
+                        name="mathematics_numeric"
+                        value="5">
+                </div>
             </li>
 
             <li>
-                Enter the duration of the test in minutes.
+                <h2>Enter the duration of the test in minutes.</h2>
 
                 <input type="number"
                     name="duration"
                     value="180"
+                    class="field"
                     required>
             </li>
 
         </ol>
 
         <input type="submit"
-            value="Start Exam">
+            value="Start Exam"
+            id="submit">
     </form>
 </body>
 {% endblock %}
