@@ -78,6 +78,11 @@ input, select {
     display: inline-block;
 }
 
+.question_button.current {
+    border: 3px solid black;
+    font-weight: bold;
+}
+
 .unanswered.visited {
     background-color: #C62828;
     color: white;

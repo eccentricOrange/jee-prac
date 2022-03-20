@@ -87,7 +87,6 @@ def count_questions():
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    setup_storage()
     return render_template('index.html'), HTTPStatus.OK
 
 
@@ -149,11 +148,11 @@ def store_value():
         if questions_status:
             number = str(request.args.get('number'))
             value = request.args.get('value')
-            
+
             if value == "null" or not value:
                 questions_status[number]['answer'] = "unanswered"
                 questions_status[number]['value'] = None
-            
+
             else:
                 questions_status[number]['answer'] = "answered"
                 questions_status[number]['value'] = value
@@ -272,6 +271,7 @@ def submitted():
 
     return dumps({}), HTTPStatus.BAD_REQUEST
 
+
 @app.route('/quit', methods=['GET'])
 def quit():
     global questions_status, test_data, START_TIME
@@ -283,3 +283,12 @@ def quit():
 
         return redirect('/'), HTTPStatus.TEMPORARY_REDIRECT
     return dumps({}), HTTPStatus.BAD_REQUEST
+
+
+def main():
+    setup_storage()
+    app.run()
+
+
+if __name__ == '__main__':
+    main()

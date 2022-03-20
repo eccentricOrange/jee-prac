@@ -4,6 +4,10 @@
 {{ q_no }}: {{ q_type }}
 {% endblock %}
 
+{% block script %}
+<script src="{{ url_for('static', filename='question_script.js') }}"></script>
+{% endblock %}
+
 {% block body %}
 
 <body onload="init_question()">
