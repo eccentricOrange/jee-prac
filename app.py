@@ -93,7 +93,7 @@ def save_recovery_data():
 
     LAST_KNOWN_TIME = datetime.now()
     recovery_data['questions_status'] = questions_status
-    recovery_data['last_known_time'] = LAST_KNOWN_TIME
+    recovery_data['last_known_time'] = LAST_KNOWN_TIME.isoformat()
 
     with open(RECOVERY_FILE, 'w') as recovery:
         recovery.write(dumps(recovery_data))
