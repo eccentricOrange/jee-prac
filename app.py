@@ -36,6 +36,7 @@ SCHEMA_PATH = Path(__file__).parent / 'schema.sql'
 FOLDER = Path().home() / '.jee-prac'
 DB_PATH = FOLDER / 'jee.db'
 START_TIME = datetime.now()
+LAST_KNOWN_TIME = datetime.now()
 SUBMITTED = False
 RECOVERY_FILE = FOLDER / 'recovery.json'
 
@@ -88,13 +89,18 @@ def count_questions():
 
 
 def save_recovery_data():
+    global recovery_data, questions_status, LAST_KNOWN_TIME
+
+    LAST_KNOWN_TIME = datetime.now()
     recovery_data['questions_status'] = questions_status
+    recovery_data['last_known_time'] = LAST_KNOWN_TIME
+
     with open(RECOVERY_FILE, 'w') as recovery:
         recovery.write(dumps(recovery_data))
 
 
 def check_recovery_data():
-    global recovery_data, questions_status, test_data, START_TIME
+    global recovery_data, questions_status, test_data, START_TIME, LAST_KNOWN_TIME
 
     if RECOVERY_FILE.exists():
         with open(RECOVERY_FILE, 'r') as recovery:
@@ -104,8 +110,8 @@ def check_recovery_data():
                 recovery_data = loads(recovery_data)
                 questions_status = recovery_data['questions_status']
                 test_data = recovery_data['test_data']
-                START_TIME = datetime.fromisoformat(
-                    recovery_data['start_time'])
+                LAST_KNOWN_TIME = datetime.fromisoformat(recovery_data['last_known_time'])
+                START_TIME = datetime.fromisoformat(recovery_data['start_time']) + (datetime.now() - LAST_KNOWN_TIME)
 
                 return True
     return False
