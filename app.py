@@ -286,7 +286,7 @@ def quit():
 
 def main():
     setup_storage()
-    app.run()
+    app.run(port=80, host='0.0.0.0')
 
 
 if __name__ == '__main__':
