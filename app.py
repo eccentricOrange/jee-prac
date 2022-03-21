@@ -1,6 +1,6 @@
 from pickle import FALSE
 from flask import Flask, render_template, request, redirect
-from json import dumps
+from json import dumps, loads
 from pathlib import Path
 from datetime import datetime
 from http import HTTPStatus
@@ -9,6 +9,7 @@ from sqlite3 import connect
 app = Flask(__name__)
 questions_status = {}
 test_data = {}
+recovery_data = {}
 
 NEW_QUESTION = {
     'number': 0,
@@ -36,6 +37,7 @@ FOLDER = Path().home() / '.jee-prac'
 DB_PATH = FOLDER / 'jee.db'
 START_TIME = datetime.now()
 SUBMITTED = False
+RECOVERY_FILE = FOLDER / 'recovery.json'
 
 
 def setup_storage():
@@ -85,24 +87,56 @@ def count_questions():
     return counts
 
 
-@app.route('/jee//', methods=['GET', 'POST'])
+def save_recovery_data():
+    recovery_data['questions_status'] = questions_status
+    with open(RECOVERY_FILE, 'w') as recovery:
+        recovery.write(dumps(recovery_data))
+
+
+def check_recovery_data():
+    global recovery_data, questions_status, test_data, START_TIME
+
+    if RECOVERY_FILE.exists():
+        with open(RECOVERY_FILE, 'r') as recovery:
+            recovery_data = recovery.read()
+
+            if recovery_data:
+                recovery_data = loads(recovery_data)
+                questions_status = recovery_data['questions_status']
+                test_data = recovery_data['test_data']
+                START_TIME = datetime.fromisoformat(
+                    recovery_data['start_time'])
+
+                return True
+    return False
+
+
+@app.route('/jee/', methods=['GET', 'POST'])
 def index():
     return render_template('index.html'), HTTPStatus.OK
 
 
-@app.route('/jee//start', methods=['GET'])
+@app.route('/jee/start', methods=['GET'])
 def start():
     if request.args:
-        global test_data, questions_status, START_TIME
+        global test_data, questions_status, START_TIME, recovery_data
         test_data = request.args.to_dict()
         questions_status = produce_list_of_questions(test_data)
         START_TIME = datetime.now()
+
+        RECOVERY_FILE.touch()
+        recovery_data = {
+            'test_data': test_data,
+            'start_time': START_TIME.isoformat()
+        }
+        save_recovery_data()
+
         return redirect('/jee/question?number=1')
 
     return "", HTTPStatus.BAD_REQUEST
 
 
-@app.route('/jee//get_questions_status', methods=['GET'])
+@app.route('/jee/get_questions_status', methods=['GET'])
 def get_questions_status():
     global questions_status
     if questions_status:
@@ -111,7 +145,7 @@ def get_questions_status():
     return "", HTTPStatus.NOT_FOUND
 
 
-@app.route('/jee//get_question_status', methods=['GET'])
+@app.route('/jee/get_question_status', methods=['GET'])
 def get_question_status():
     if request.args and 'number' in request.args:
 
@@ -122,7 +156,7 @@ def get_question_status():
     return "", HTTPStatus.BAD_REQUEST
 
 
-@app.route('/jee//question', methods=['GET'])
+@app.route('/jee/question', methods=['GET'])
 def question():
     global questions_status
 
@@ -134,15 +168,17 @@ def question():
                 questions_status[number]['visit'] = "visited"
 
             question = questions_status[number]
+
+            save_recovery_data()
             return render_template(f'{question["type"]}.html', q_no=question['number'], q_type=question["type"]), HTTPStatus.OK
 
         return "", HTTPStatus.NOT_FOUND
     return "", HTTPStatus.BAD_REQUEST
 
 
-@app.route('/jee//store_value', methods=['POST'])
+@app.route('/jee/store_value', methods=['POST'])
 def store_value():
-    global questions_status
+    global questions_status, recovery_data
 
     if request.args and 'number' in request.args and 'value' in request.args:
         if questions_status:
@@ -157,39 +193,44 @@ def store_value():
                 questions_status[number]['answer'] = "answered"
                 questions_status[number]['value'] = value
 
+            save_recovery_data()
             return dumps({'status': 'success'}), HTTPStatus.OK
 
         return "", HTTPStatus.NOT_FOUND
     return "", HTTPStatus.BAD_REQUEST
 
 
-@app.route('/jee//unmark', methods=['POST'])
+@app.route('/jee/unmark', methods=['POST'])
 def mark():
     global questions_status
     if request.args and 'number' in request.args:
         if questions_status:
             number = str(request.args.get('number'))
             questions_status[number]['mark'] = "unmarked"
+
+            save_recovery_data()
             return dumps({'status': 'success'}), HTTPStatus.OK
 
         return "", HTTPStatus.NOT_FOUND
     return "", HTTPStatus.BAD_REQUEST
 
 
-@app.route('/jee//mark', methods=['POST'])
+@app.route('/jee/mark', methods=['POST'])
 def unmark():
     global questions_status
     if request.args and 'number' in request.args:
         if questions_status:
             number = str(request.args.get('number'))
             questions_status[number]['mark'] = "marked"
+
+            save_recovery_data()
             return dumps({'status': 'success'}), HTTPStatus.OK
 
         return "", HTTPStatus.NOT_FOUND
     return "", HTTPStatus.BAD_REQUEST
 
 
-@app.route('/jee//submit', methods=['POST', 'GET'])
+@app.route('/jee/submit', methods=['POST', 'GET'])
 def submit():
     END_TIME = datetime.now()
     global questions_status, test_data, START_TIME, SUBMITTED
@@ -233,22 +274,25 @@ def submit():
         test_data = {}
         START_TIME = datetime.now()
 
+        RECOVERY_FILE.unlink(missing_ok=True)
+
         return redirect('/jee/submitted'), HTTPStatus.TEMPORARY_REDIRECT
     return "", HTTPStatus.NOT_FOUND
 
 
-@app.route('/jee//get_remaining_time', methods=['GET'])
+@app.route('/jee/get_remaining_time', methods=['GET'])
 def get_remaining_time():
     global START_TIME, test_data
 
     if START_TIME:
-        remaining_time = (int(test_data['duration']) * 60) - (datetime.now() - START_TIME).total_seconds()
+        remaining_time = (
+            int(test_data['duration']) * 60) - (datetime.now() - START_TIME).total_seconds()
 
         return dumps({'remaining_time': remaining_time}), HTTPStatus.OK
     return "", HTTPStatus.NOT_FOUND
 
 
-@app.route('/jee//get_counts', methods=['GET'])
+@app.route('/jee/get_counts', methods=['GET'])
 def get_counts():
     global questions_status
 
@@ -259,7 +303,7 @@ def get_counts():
     return "", HTTPStatus.NOT_FOUND
 
 
-@app.route('/jee//submitted', methods=['GET'])
+@app.route('/jee/submitted', methods=['GET'])
 def submitted():
     global SUBMITTED
 
@@ -271,7 +315,7 @@ def submitted():
     return "", HTTPStatus.BAD_REQUEST
 
 
-@app.route('/jee//quit', methods=['GET'])
+@app.route('/jee/quit', methods=['GET'])
 def quit():
     global questions_status, test_data, START_TIME
 
@@ -280,12 +324,15 @@ def quit():
         test_data = {}
         START_TIME = datetime.now()
 
+        RECOVERY_FILE.unlink(missing_ok=True)
+
         return redirect('/jee/'), HTTPStatus.TEMPORARY_REDIRECT
     return "", HTTPStatus.BAD_REQUEST
 
 
 def main():
     setup_storage()
+    check_recovery_data()
     app.run(port=80, host='0.0.0.0')
 
 
