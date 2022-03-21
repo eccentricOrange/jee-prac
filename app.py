@@ -99,7 +99,7 @@ def start():
         START_TIME = datetime.now()
         return redirect('/question?number=1')
 
-    return dumps({}), HTTPStatus.BAD_REQUEST
+    return "", HTTPStatus.BAD_REQUEST
 
 
 @app.route('/get_questions_status', methods=['GET'])
@@ -108,7 +108,7 @@ def get_questions_status():
     if questions_status:
         return dumps(questions_status), HTTPStatus.OK
 
-    return dumps({}), HTTPStatus.NOT_FOUND
+    return "", HTTPStatus.NOT_FOUND
 
 
 @app.route('/get_question_status', methods=['GET'])
@@ -118,8 +118,8 @@ def get_question_status():
         if questions_status:
             return dumps(questions_status[request.args.get('number')]), HTTPStatus.OK
 
-        return dumps({}), HTTPStatus.NOT_FOUND
-    return dumps({}), HTTPStatus.BAD_REQUEST
+        return "", HTTPStatus.NOT_FOUND
+    return "", HTTPStatus.BAD_REQUEST
 
 
 @app.route('/question', methods=['GET'])
@@ -136,8 +136,8 @@ def question():
             question = questions_status[number]
             return render_template(f'{question["type"]}.html', q_no=question['number'], q_type=question["type"]), HTTPStatus.OK
 
-        return dumps({}), HTTPStatus.NOT_FOUND
-    return dumps({}), HTTPStatus.BAD_REQUEST
+        return "", HTTPStatus.NOT_FOUND
+    return "", HTTPStatus.BAD_REQUEST
 
 
 @app.route('/store_value', methods=['POST'])
@@ -159,8 +159,8 @@ def store_value():
 
             return dumps({'status': 'success'}), HTTPStatus.OK
 
-        return dumps({}), HTTPStatus.NOT_FOUND
-    return dumps({}), HTTPStatus.BAD_REQUEST
+        return "", HTTPStatus.NOT_FOUND
+    return "", HTTPStatus.BAD_REQUEST
 
 
 @app.route('/unmark', methods=['POST'])
@@ -172,8 +172,8 @@ def mark():
             questions_status[number]['mark'] = "unmarked"
             return dumps({'status': 'success'}), HTTPStatus.OK
 
-        return dumps({}), HTTPStatus.NOT_FOUND
-    return dumps({}), HTTPStatus.BAD_REQUEST
+        return "", HTTPStatus.NOT_FOUND
+    return "", HTTPStatus.BAD_REQUEST
 
 
 @app.route('/mark', methods=['POST'])
@@ -185,8 +185,8 @@ def unmark():
             questions_status[number]['mark'] = "marked"
             return dumps({'status': 'success'}), HTTPStatus.OK
 
-        return dumps({}), HTTPStatus.NOT_FOUND
-    return dumps({}), HTTPStatus.BAD_REQUEST
+        return "", HTTPStatus.NOT_FOUND
+    return "", HTTPStatus.BAD_REQUEST
 
 
 @app.route('/submit', methods=['POST', 'GET'])
@@ -234,19 +234,18 @@ def submit():
         START_TIME = datetime.now()
 
         return redirect('/submitted'), HTTPStatus.TEMPORARY_REDIRECT
-    return dumps({}), HTTPStatus.NOT_FOUND
+    return "", HTTPStatus.NOT_FOUND
 
 
 @app.route('/get_remaining_time', methods=['GET'])
 def get_remaining_time():
-    global START_TIME
+    global START_TIME, test_data
 
     if START_TIME:
-        remaining_time = (
-            int(test_data['duration']) * 60) - (datetime.now() - START_TIME).total_seconds()
+        remaining_time = (int(test_data['duration']) * 60) - (datetime.now() - START_TIME).total_seconds()
 
         return dumps({'remaining_time': remaining_time}), HTTPStatus.OK
-    return dumps({}), HTTPStatus.NOT_FOUND
+    return "", HTTPStatus.NOT_FOUND
 
 
 @app.route('/get_counts', methods=['GET'])
@@ -257,7 +256,7 @@ def get_counts():
         counts = count_questions()
 
         return dumps(counts), HTTPStatus.OK
-    return dumps({}), HTTPStatus.NOT_FOUND
+    return "", HTTPStatus.NOT_FOUND
 
 
 @app.route('/submitted', methods=['GET'])
@@ -269,7 +268,7 @@ def submitted():
 
     SUBMITTED = False
 
-    return dumps({}), HTTPStatus.BAD_REQUEST
+    return "", HTTPStatus.BAD_REQUEST
 
 
 @app.route('/quit', methods=['GET'])
@@ -282,7 +281,7 @@ def quit():
         START_TIME = datetime.now()
 
         return redirect('/'), HTTPStatus.TEMPORARY_REDIRECT
-    return dumps({}), HTTPStatus.BAD_REQUEST
+    return "", HTTPStatus.BAD_REQUEST
 
 
 def main():

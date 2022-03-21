@@ -132,6 +132,7 @@ input, select {
 
 #statistics {
     border-collapse: collapse;
+    break-inside: avoid;
 }
 
 #statistics td, #statistics th {
@@ -146,4 +147,26 @@ input, select {
 #new_exam {
     display: block;
     margin: 50px;
+}
+
+@media (max-width: 1024px) {
+    #config_test {
+        column-count: 1;
+    }
+}
+
+@media (max-width: 720px) {
+    #palette {
+        column-count: 1;
+    }
+
+    .subject {
+        margin: 20px 0;
+    }
+}
+
+@media (max-width: 360px) {
+    input, select {
+        width: 75%;
+    }
 }

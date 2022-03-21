@@ -30,6 +30,7 @@ function init_question() {
     disable_next();
     disable_previous();
     initialize_mark_button();
+    set_value_from_server();
     setInterval(clock, 1000);
 }
 
@@ -158,7 +159,7 @@ function disable_previous() {
 function set_value_from_server() {
     questions_status.then(
         function (data) {
-            if (data[current_number][type] == 'mcq') {
+            if (data[current_number]['type'] == 'mcq') {
                 if (data[current_number]['value'] != 'null' && data[current_number]['value'] != null && data[current_number]['value'] != '') {
                     document.querySelector(`input[value="${data[current_number]['value']}"]`).checked = true;
                 }
