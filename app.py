@@ -121,26 +121,40 @@ def check_recovery_data():
     return False
 
 
-def convert_to_csv():
-    EXAMS_CSV_FILE.touch()
-    QUESTIONS_CSV_FILE.touch()
-
-    with connect(DB_PATH) as connection, open(EXAMS_CSV_FILE, 'w') as exams_csv, open(QUESTIONS_CSV_FILE, 'w') as questions_csv:
+def convert_to_csv(file_type: str):
+    with connect(DB_PATH) as connection:
         cursor = connection.cursor()
+    
+        if file_type == 'exams':
 
-        exams_headers = ["exam_id", "start_time", "end_time"]
-        questions_headers = ["question_id", "question_number", "exam_id", "type", "subject", "value"]
+            EXAMS_CSV_FILE.touch()
 
-        exams_data = cursor.execute(f"SELECT {', '.join(exams_headers)} FROM exams").fetchall()
-        questions_data = cursor.execute(f"SELECT {', '.join(questions_headers)} FROM questions").fetchall()
+            with open(EXAMS_CSV_FILE, 'w') as exams_csv:
 
-        exams_writer = writer(exams_csv)
-        exams_writer.writerow(exams_headers)
-        exams_writer.writerows(exams_data)
+                exams_headers = ["exam_id", "start_time", "end_time"]
 
-        questions_writer = writer(questions_csv)
-        questions_writer.writerow(questions_headers)
-        questions_writer.writerows(questions_data)
+                exams_data = cursor.execute(f"SELECT {', '.join(exams_headers)} FROM exams").fetchall()
+                
+                exams_writer = writer(exams_csv)
+                exams_writer.writerow(exams_headers)
+                exams_writer.writerows(exams_data)
+
+        elif file_type == 'questions':
+                
+                QUESTIONS_CSV_FILE.touch()
+    
+                with open(QUESTIONS_CSV_FILE, 'w') as questions_csv:
+    
+                    questions_headers = ["question_id", "question_number", "exam_id", "type", "subject", "value"]
+    
+                    questions_data = cursor.execute(f"SELECT {', '.join(questions_headers)} FROM questions").fetchall()
+                    
+                    questions_writer = writer(questions_csv)
+                    questions_writer.writerow(questions_headers)
+                    questions_writer.writerows(questions_data)
+
+        else:
+            raise Exception(f"Invalid file type: {file_type}")
 
 
 @app.route('/jee/', methods=['GET', 'POST'])
@@ -362,16 +376,25 @@ def quit():
     return "", HTTPStatus.BAD_REQUEST
 
 
+@app.route('/jee/downloads', methods=['GET'])
+def downloads():
+    return render_template('downloads_page.html'), HTTPStatus.OK
+
+
 @app.route('/jee/download_exams_csv', methods=['GET'])
 def download_exams_csv():
-    convert_to_csv()
-    return send_file(EXAMS_CSV_FILE)
+    convert_to_csv('exams')
+    file = send_file(EXAMS_CSV_FILE)
+    EXAMS_CSV_FILE.unlink(missing_ok=True)
+    return file, HTTPStatus.OK
 
 
 @app.route('/jee/download_questions_csv', methods=['GET'])
 def download_questions_csv():
-    convert_to_csv()
-    return send_file(QUESTIONS_CSV_FILE)
+    convert_to_csv('questions')
+    file = send_file(QUESTIONS_CSV_FILE)
+    QUESTIONS_CSV_FILE.unlink(missing_ok=True)
+    return file, HTTPStatus.OK
 
 
 def main():

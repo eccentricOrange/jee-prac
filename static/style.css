@@ -145,7 +145,7 @@ input, select {
     text-align: left;
 }
 
-#new_exam {
+#new_exam, #download_questions, #download_exams {
     display: block;
     margin: 50px;
 }
