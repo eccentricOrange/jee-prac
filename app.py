@@ -1,10 +1,10 @@
-from pickle import FALSE
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, send_file
 from json import dumps, loads
 from pathlib import Path
 from datetime import datetime
 from http import HTTPStatus
 from sqlite3 import connect
+from csv import writer
 
 app = Flask(__name__)
 questions_status = {}
@@ -32,13 +32,17 @@ TYPES = [
     'numeric'
 ]
 
-SCHEMA_PATH = Path(__file__).parent / 'schema.sql'
 FOLDER = Path().home() / '.jee-prac'
+
+SCHEMA_PATH = Path(__file__).parent / 'schema.sql'
 DB_PATH = FOLDER / 'jee.db'
+RECOVERY_FILE = FOLDER / 'recovery.json'
+EXAMS_CSV_FILE = FOLDER / 'exams.csv'
+QUESTIONS_CSV_FILE = FOLDER / 'questions.csv'
+
 START_TIME = datetime.now()
 LAST_KNOWN_TIME = datetime.now()
 SUBMITTED = False
-RECOVERY_FILE = FOLDER / 'recovery.json'
 
 
 def setup_storage():
@@ -115,6 +119,28 @@ def check_recovery_data():
 
                 return True
     return False
+
+
+def convert_to_csv():
+    EXAMS_CSV_FILE.touch()
+    QUESTIONS_CSV_FILE.touch()
+
+    with connect(DB_PATH) as connection, open(EXAMS_CSV_FILE, 'w') as exams_csv, open(QUESTIONS_CSV_FILE, 'w') as questions_csv:
+        cursor = connection.cursor()
+
+        exams_headers = ["exam_id", "start_time", "end_time"]
+        questions_headers = ["question_id", "question_number", "exam_id", "type", "subject", "value"]
+
+        exams_data = cursor.execute(f"SELECT {', '.join(exams_headers)} FROM exams").fetchall()
+        questions_data = cursor.execute(f"SELECT {', '.join(questions_headers)} FROM questions").fetchall()
+
+        exams_writer = writer(exams_csv)
+        exams_writer.writerow(exams_headers)
+        exams_writer.writerows(exams_data)
+
+        questions_writer = writer(questions_csv)
+        questions_writer.writerow(questions_headers)
+        questions_writer.writerows(questions_data)
 
 
 @app.route('/jee/', methods=['GET', 'POST'])
@@ -334,6 +360,18 @@ def quit():
 
         return redirect('/jee/'), HTTPStatus.TEMPORARY_REDIRECT
     return "", HTTPStatus.BAD_REQUEST
+
+
+@app.route('/jee/download_exams_csv', methods=['GET'])
+def download_exams_csv():
+    convert_to_csv()
+    return send_file(EXAMS_CSV_FILE)
+
+
+@app.route('/jee/download_questions_csv', methods=['GET'])
+def download_questions_csv():
+    convert_to_csv()
+    return send_file(QUESTIONS_CSV_FILE)
 
 
 def main():
