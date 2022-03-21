@@ -133,6 +133,7 @@ input, select {
 #statistics {
     border-collapse: collapse;
     break-inside: avoid;
+    font-family: sans-serif;
 }
 
 #statistics td, #statistics th {
