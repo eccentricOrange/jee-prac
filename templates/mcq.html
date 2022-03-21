@@ -2,37 +2,44 @@
 
 
 {% block question %}
-<form onchange="store_value()">
-    <input type="radio"
-        name="question"
-        value="A"
-        id="A">
-    <label for="A">A</label>
+<input type="radio"
+    name="question"
+    value="A"
+    onchange="store_value()"
+    onsubmit="store_value()"
+    id="A">
+<label for="A">A</label>
 
-    <input type="radio"
-        name="question"
-        value="B"
-        id="B">
-    <label for="B">B</label>
+<input type="radio"
+    name="question"
+    value="B"
+    id="B"
+    onchange="store_value()"
+    onsubmit="store_value()">
+<label for="B">B</label>
 
-    <input type="radio"
-        name="question"
-        value="C"
-        id="C">
-    <label for="C">C</label>
+<input type="radio"
+    name="question"
+    value="C"
+    id="C"
+    onchange="store_value()"
+    onsubmit="store_value()">
+<label for="C">C</label>
 
-    <input type="radio"
-        name="question"
-        value="D"
-        id="D">
-    <label for="D">D</label>
+<input type="radio"
+    name="question"
+    value="D"
+    id="D"
+    onchange="store_value()"
+    onsubmit="store_value()">
+<label for="D">D</label>
 
-    <br>
-    <br>
+<br>
+<br>
 
-    <input type="button"
-        value="Clear"
-        onclick="clear_mcq()">
+<input type="button"
+    value="Clear"
+    onclick="clear_mcq()">
 
 </form>
 {% endblock %}

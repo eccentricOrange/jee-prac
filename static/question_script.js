@@ -1,8 +1,8 @@
 const url_params = new URLSearchParams(window.location.search);
 const current_number = parseInt(url_params.get('number'));
-const questions_status = get_url('/get_questions_status');
-const counts_request = get_url('/get_counts')
-const remaining_time_request = get_url('/get_remaining_time');
+const questions_status = get_url('/jee/get_questions_status');
+const counts_request = get_url('/jee/get_counts')
+const remaining_time_request = get_url('/jee/get_remaining_time');
 
 let remaining_time = 0;
 
@@ -190,7 +190,7 @@ function create_button_in_palette(data, question) {
     new_button.innerHTML = data[question]['number'];
 
     new_button.onclick = function () {
-        window.location.href = `/question?number=${new_button.id}`;
+        window.location.href = `/jee/question?number=${new_button.id}`;
     };
 
     document.getElementById(data[question]['subject']).appendChild(new_button);
@@ -218,7 +218,7 @@ function mark() {
             let palette_button_classes = document.getElementById(`${current_number}`).classList;
 
             if (data[current_number]['mark'] == 'marked') {
-                post(`/unmark?number=${current_number}`);
+                post(`/jee/unmark?number=${current_number}`);
 
                 palette_button_classes.remove('marked');
                 palette_button_classes.add('unmarked');
@@ -230,7 +230,7 @@ function mark() {
             }
 
             else {
-                post(`/mark?number=${current_number}`);
+                post(`/jee/mark?number=${current_number}`);
 
                 palette_button_classes.remove('unmarked');
                 palette_button_classes.add('marked');
@@ -248,18 +248,18 @@ function mark() {
 
 // Called by UI button
 function next() {
-    window.location.href = `/question?number=${current_number + 1}`;
+    window.location.href = `/jee/question?number=${current_number + 1}`;
 }
 
 // Called by UI button
 function previous() {
-    window.location.href = `/question?number=${current_number - 1}`;
+    window.location.href = `/jee/question?number=${current_number - 1}`;
 }
 
 // Called by UI button
 function quit() {
     if (end_prompt(counts, 'quit')) {
-        window.location.href = '/quit';
+        window.location.href = '/jee/quit';
     }
 }
 
@@ -268,12 +268,12 @@ function submit(popup_required) {
     if (popup_required) {
         if (end_prompt(counts, 'submit')) {
             store_value();
-            window.location.href = '/submit';
+            window.location.href = '/jee/submit';
         }
     }
 
     else {
-        window.location.href = '/submit';
+        window.location.href = '/jee/submit';
     }
 }
 
@@ -283,7 +283,7 @@ function store_value() {
         function (data) {
             const value = data[current_number]['type'] == 'mcq' ? get_mcq_value() : get_numeric_value();
 
-            post(`/store_value?number=${current_number}&value=${value}`);
+            post(`/jee/store_value?number=${current_number}&value=${value}`);
             set_palette_button_answer(value);
             set_counts();
         }

@@ -2,9 +2,9 @@
 
 
 {% block question %}
-<form onchange="store_value()">
-    <input type="number"
-        name="question">
-</form>
+<input type="number"
+    onchange="store_value()"
+    onsubmit="store_value()"
+    name="question">
 
 {% endblock %}

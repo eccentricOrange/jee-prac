@@ -85,24 +85,24 @@ def count_questions():
     return counts
 
 
-@app.route('/jee/', methods=['GET', 'POST'])
+@app.route('/jee//', methods=['GET', 'POST'])
 def index():
     return render_template('index.html'), HTTPStatus.OK
 
 
-@app.route('/jee/start', methods=['GET'])
+@app.route('/jee//start', methods=['GET'])
 def start():
     if request.args:
         global test_data, questions_status, START_TIME
         test_data = request.args.to_dict()
         questions_status = produce_list_of_questions(test_data)
         START_TIME = datetime.now()
-        return redirect('/question?number=1')
+        return redirect('/jee/question?number=1')
 
     return "", HTTPStatus.BAD_REQUEST
 
 
-@app.route('/jee/get_questions_status', methods=['GET'])
+@app.route('/jee//get_questions_status', methods=['GET'])
 def get_questions_status():
     global questions_status
     if questions_status:
@@ -111,7 +111,7 @@ def get_questions_status():
     return "", HTTPStatus.NOT_FOUND
 
 
-@app.route('/jee/get_question_status', methods=['GET'])
+@app.route('/jee//get_question_status', methods=['GET'])
 def get_question_status():
     if request.args and 'number' in request.args:
 
@@ -122,7 +122,7 @@ def get_question_status():
     return "", HTTPStatus.BAD_REQUEST
 
 
-@app.route('/jee/question', methods=['GET'])
+@app.route('/jee//question', methods=['GET'])
 def question():
     global questions_status
 
@@ -140,7 +140,7 @@ def question():
     return "", HTTPStatus.BAD_REQUEST
 
 
-@app.route('/jee/store_value', methods=['POST'])
+@app.route('/jee//store_value', methods=['POST'])
 def store_value():
     global questions_status
 
@@ -163,7 +163,7 @@ def store_value():
     return "", HTTPStatus.BAD_REQUEST
 
 
-@app.route('/jee/unmark', methods=['POST'])
+@app.route('/jee//unmark', methods=['POST'])
 def mark():
     global questions_status
     if request.args and 'number' in request.args:
@@ -176,7 +176,7 @@ def mark():
     return "", HTTPStatus.BAD_REQUEST
 
 
-@app.route('/jee/mark', methods=['POST'])
+@app.route('/jee//mark', methods=['POST'])
 def unmark():
     global questions_status
     if request.args and 'number' in request.args:
@@ -189,7 +189,7 @@ def unmark():
     return "", HTTPStatus.BAD_REQUEST
 
 
-@app.route('/jee/submit', methods=['POST', 'GET'])
+@app.route('/jee//submit', methods=['POST', 'GET'])
 def submit():
     END_TIME = datetime.now()
     global questions_status, test_data, START_TIME, SUBMITTED
@@ -233,11 +233,11 @@ def submit():
         test_data = {}
         START_TIME = datetime.now()
 
-        return redirect('/submitted'), HTTPStatus.TEMPORARY_REDIRECT
+        return redirect('/jee/submitted'), HTTPStatus.TEMPORARY_REDIRECT
     return "", HTTPStatus.NOT_FOUND
 
 
-@app.route('/jee/get_remaining_time', methods=['GET'])
+@app.route('/jee//get_remaining_time', methods=['GET'])
 def get_remaining_time():
     global START_TIME, test_data
 
@@ -248,7 +248,7 @@ def get_remaining_time():
     return "", HTTPStatus.NOT_FOUND
 
 
-@app.route('/jee/get_counts', methods=['GET'])
+@app.route('/jee//get_counts', methods=['GET'])
 def get_counts():
     global questions_status
 
@@ -259,7 +259,7 @@ def get_counts():
     return "", HTTPStatus.NOT_FOUND
 
 
-@app.route('/jee/submitted', methods=['GET'])
+@app.route('/jee//submitted', methods=['GET'])
 def submitted():
     global SUBMITTED
 
@@ -271,7 +271,7 @@ def submitted():
     return "", HTTPStatus.BAD_REQUEST
 
 
-@app.route('/jee/quit', methods=['GET'])
+@app.route('/jee//quit', methods=['GET'])
 def quit():
     global questions_status, test_data, START_TIME
 
@@ -280,7 +280,7 @@ def quit():
         test_data = {}
         START_TIME = datetime.now()
 
-        return redirect('/'), HTTPStatus.TEMPORARY_REDIRECT
+        return redirect('/jee/'), HTTPStatus.TEMPORARY_REDIRECT
     return "", HTTPStatus.BAD_REQUEST
 
 
