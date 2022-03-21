@@ -85,20 +85,18 @@ function set_palette_button_answer(value) {
         if (palette_button.classList.contains('answered')) {
             palette_button.classList.remove('answered');
             palette_button.classList.add('unanswered');
+            counts['answered'] -= 1;
+            counts['unanswered'] += 1;
         }
-
-        counts['answered'] -= 1;
-        counts['unanswered'] += 1;
     }
 
     else {
         if (palette_button.classList.contains('unanswered')) {
             palette_button.classList.remove('unanswered');
             palette_button.classList.add('answered');
+            counts['answered'] += 1;
+            counts['unanswered'] -= 1;
         }
-
-        counts['answered'] += 1;
-        counts['unanswered'] -= 1;
     }
 }
 
@@ -283,8 +281,9 @@ function store_value() {
         function (data) {
             const value = data[current_number]['type'] == 'mcq' ? get_mcq_value() : get_numeric_value();
 
-            post(`/jee/store_value?number=${current_number}&value=${value}`);
             set_palette_button_answer(value);
+            post(`/jee/store_value?number=${current_number}&value=${value}`);
+            data[current_number]['value'] = value;
             set_counts();
         }
     );
