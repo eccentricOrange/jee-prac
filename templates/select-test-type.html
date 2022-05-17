@@ -1,0 +1,74 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Configure Test
+{% endblock %}
+
+{% block script %}
+<script>
+    const jsonfile = JSON.parse('{{ jsonfile | tojson | safe}}');
+</script>
+<script src="{{ url_for('static', filename='select-test-type-script.js') }}"></script>
+{% endblock %}
+
+{% block body %}
+
+<body onload="init()">
+    <h1>
+        Select the type of exam
+    </h1>
+
+    <form id="select-test-type-form">
+        <fieldset>
+            <legend>Choose an exam type</legend>
+            <select name="test-type"
+                id="test-type"
+                required
+                onchange="update_duration_on_test_change()">
+                <option value="jee-mains">JEE Mains</option>
+                <option value="jee-mains-old">JEE Mains (Old Pattern)</option>
+                <option value="jee-adv"
+                    disabled>JEE Advanced</option>
+                <option value="bitsat">BITSAT</option>
+                <option value="kcet">KCET</option>
+                <option value="viteee">VITEEE</option>
+                <option value="ugee">IIIT-H UGEE</option>
+                <option value="custom">[Custom]</option>
+            </select>
+        </fieldset>
+
+        <fieldset>
+            <legend>Duration</legend>
+            Type of timing system
+            <select name="timing-type"
+                id="timing-type"
+                required
+                onchange="update_duration_on_timing_type_change()">
+                <option value="set-time"
+                    id="set-time" selected>Standard duration</option>
+                <option value="custom-time"
+                    id="custom-time">Custom duration</option>
+                <option value="untimed"
+                    id="untimed">Untimed</option>
+            </select>
+
+            <br />
+
+            Duration (in minutes)
+            <input type="number"
+                name="duration"
+                id="duration"
+                value=180
+                disabled>
+
+        </fieldset>
+
+        <input type="reset"
+            value="Reset form">
+        <input type="submit"
+            value="Continue"
+            onclick="init()">
+    </form>
+</body>
+
+{% endblock %}

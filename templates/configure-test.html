@@ -1,0 +1,99 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Configure Test
+{% endblock %}
+
+{% block script %}
+<script src="{{ url_for('static', filename='configure-test-script.js') }}"></script>
+{% endblock %}
+
+{% block body %}
+
+<body>
+    <h1>
+        Configure the exam
+    </h1>
+
+    <form>
+        <div id="sections">
+            <div class="section-field-config-test">
+                Exam name
+                <input type="text"
+                    name="exam-name"
+                    id="exam-name"
+                    required>
+            </div>
+            <fieldset id="section-1">
+                <legend>Section 1</legend>
+                <div class="section-field-config-test">
+                    Section name
+                    <input type="text"
+                        name="section-1-name"
+                        id="section-1-name"
+                        required>
+                </div>
+
+                <div class="section-field-config-test">
+                    Questions type
+                    <select name="section-1-questions-type"
+                        id="section-1-questions-type"
+                        required>
+                        <option value="mcq">Multiple Choice Questions (MCQ)</option>
+                        <option value="numeric">Numeric</option>
+                    </select>
+                </div>
+
+                <div class="section-field-config-test">
+                    Number of questions
+                    <input type="number"
+                        name="section-1-number-of-questions"
+                        id="section-1-number-of-questions"
+                        required>
+                </div>
+
+                <div class="section-field-config-test">
+                    Marks if correct
+                    <input type="number"
+                        name="section-1-marks-if-correct"
+                        id="section-1-marks-if-correct"
+                        required>
+                </div>
+
+                <div class="section-field-config-test">
+                    Marks if unattempted
+                    <input type="number"
+                        name="section-1-marks-if-unattempted"
+                        id="section-1-marks-if-unattempted"
+                        required>
+                </div>
+
+                <div class="section-field-config-test">
+                    Marks if wrong
+                    <input type="number"
+                        name="section-1-marks-if-wrong"
+                        id="section-1-marks-if-wrong"
+                        required>
+                </div>
+            </fieldset>
+        </div>
+
+        <input type="button"
+            value="Add Section"
+            id="add-section"
+            onclick="add_section()">
+
+        <input type="reset"
+            value="Reset form"
+            id="reset-sections"
+            onclick="reset_form()">
+        <input type="button"
+            value="Back to test types"
+            id="back-to-test-types">
+
+        <input type="submit"
+            value="Start test"
+            id="start-test">
+    </form>
+</body>
+{% endblock %}
