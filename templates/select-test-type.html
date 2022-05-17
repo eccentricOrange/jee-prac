@@ -18,7 +18,9 @@ Configure Test
         Select the type of exam
     </h1>
 
-    <form id="select-test-type-form">
+    <form id="select-test-type-form"
+        method="post"
+        action="/jee/receive-test-type">
         <fieldset>
             <legend>Choose an exam type</legend>
             <select name="test-type"
@@ -45,7 +47,8 @@ Configure Test
                 required
                 onchange="update_duration_on_timing_type_change()">
                 <option value="set-time"
-                    id="set-time" selected>Standard duration</option>
+                    id="set-time"
+                    selected>Standard duration</option>
                 <option value="custom-time"
                     id="custom-time">Custom duration</option>
                 <option value="untimed"
@@ -64,10 +67,10 @@ Configure Test
         </fieldset>
 
         <input type="reset"
-            value="Reset form">
-        <input type="submit"
-            value="Continue"
+            value="Reset form"
             onclick="init()">
+        <input type="submit"
+            value="Continue">
     </form>
 </body>
 

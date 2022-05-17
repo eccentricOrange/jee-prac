@@ -1,0 +1,78 @@
+{% extends "layout.html" %}
+
+{% block title %}
+{{ q_no }}: {{ q_type }}
+{% endblock %}
+
+{% block script %}
+<script src="{{ url_for('static', filename='question_script.js') }}"></script>
+{% endblock %}
+
+{% block body %}
+
+<body>
+    <div id="title-and-time">
+        <h1>
+            {{ test }}: {{ q_no }}
+        </h1>
+
+        <span>
+            {{ timer_type }}
+        </span>
+
+        <span id="timer"></span>
+    </div>
+
+    <form>
+        <fieldset id="question">
+            <legend>
+                {{ q_type }} question
+            </legend>
+
+            {% block question %} {% endblock %}
+        </fieldset>
+
+        <fieldset class="not-bordered palette">
+            {% for section in sections %}
+
+            <fieldset class="not-bordered palette section">
+                {% for question in section.questions %}
+                <input type="button"
+                    value="question-{{ question.question_number }}"
+                    class="palette button {{ question.marked }} {{ question.answered }}"
+                    onclick="go_to_question({{ question.question_number }})">
+                {% endfor %}
+            </fieldset>
+
+
+            {% endfor %}
+        </fieldset>
+
+
+        <fieldset id="controls"
+            class="not-bordered">
+            <input type="button"
+                value="Previous"
+                class="control"
+                onclick="go_to_previous_question({{ q_no }})">
+
+            <input type="button"
+                value="Next"
+                class="control"
+                onclick="go_to_next_question({{ q_no }})">
+            <input type="button"
+                value="Mark"
+                class="control"
+                onclick="mark_question({{ q_no }})">
+            <input type="button"
+                value="Quit"
+                class="control"
+                onclick="quit_test()">
+            <input type="submit"
+                value="Submit"
+                class="control">
+        </fieldset>
+    </form>
+</body>
+
+{% endblock %}

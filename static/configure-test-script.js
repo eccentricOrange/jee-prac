@@ -4,12 +4,14 @@ const field_container = document.createElement("div")
 field_container.className = "section-field-config-test"
 
 function get_new_section(section_number) {
+    // create section within form
     var host_section = document.createElement("fieldset");
     host_section.id = `section-${section_number}`;
 
     var section_heading = document.createElement("legend");
     section_heading.innerHTML = `Section ${section_number}`;
 
+    // input for section name
     var name_div = field_container.cloneNode(true);
     name_div.innerHTML = "Section name"
 
@@ -21,6 +23,7 @@ function get_new_section(section_number) {
 
     name_div.appendChild(name_input);
 
+    // input for questions type
     var questions_type_div = field_container.cloneNode(true);
     questions_type_div.innerHTML = "Questions type"
 
@@ -42,6 +45,7 @@ function get_new_section(section_number) {
 
     questions_type_div.appendChild(questions_type_select);
 
+    // input for questions count
     var number_of_questions__div = field_container.cloneNode(true);
     number_of_questions__div.innerHTML = "Number of questions"
 
@@ -53,17 +57,7 @@ function get_new_section(section_number) {
 
     number_of_questions__div.appendChild(number_of_questions_input);
 
-    var number_of_questions_div = field_container.cloneNode(true);
-    number_of_questions_div.innerHTML = "Number of questions"
-
-    var number_of_questions_select = document.createElement("input");
-    number_of_questions_select.setAttribute("type", "number");
-    number_of_questions_select.setAttribute("name", `section-${section_number}-number-of-questions`);
-    number_of_questions_select.setAttribute("id", `section-${section_number}-number-of-questions`);
-    number_of_questions_select.setAttribute("required", "");
-
-    number_of_questions_div.appendChild(number_of_questions_select);
-
+    // input for marks if correct
     var marks_if_correct_div = field_container.cloneNode(true);
     marks_if_correct_div.innerHTML = "Marks if correct"
 
@@ -75,6 +69,7 @@ function get_new_section(section_number) {
 
     marks_if_correct_div.appendChild(marks_if_correct_input);
 
+    // input for marks if unattempted
     var marks_if_unattempted_div = field_container.cloneNode(true);
     marks_if_unattempted_div.innerHTML = "Marks if unattempted"
 
@@ -86,6 +81,7 @@ function get_new_section(section_number) {
 
     marks_if_unattempted_div.appendChild(marks_if_unattempted_input);
 
+    // input for marks if wrong
     var marks_if_wrong_div = field_container.cloneNode(true);
     marks_if_wrong_div.innerHTML = "Marks if wrong"
 
@@ -97,12 +93,14 @@ function get_new_section(section_number) {
 
     marks_if_wrong_div.appendChild(marks_if_wrong_input);
 
+    // button to delete section
     var delete_section_button = document.createElement("button");
     delete_section_button.setAttribute("type", "button");
     delete_section_button.setAttribute("id", `delete-section-${section_number}`);
     delete_section_button.setAttribute("onclick", `delete_section(${section_number})`);
     delete_section_button.innerHTML = "Delete";
 
+    // append all inputs to section
     host_section.appendChild(section_heading);
     host_section.appendChild(name_div);
     host_section.appendChild(questions_type_div);
