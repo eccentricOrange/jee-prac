@@ -1,0 +1,16 @@
+{% extends "question.html" %}
+
+    {% block question %}
+
+        <input type="number"
+            name="question"
+            id="question"
+            value="{{ value }}"
+            onchange="store_numeric()"
+            onsubmit="store_numeric()">
+
+        <input type="button"
+            value="Clear"
+            onclick="clear_numeric()">
+
+    {% endblock %}

@@ -8,80 +8,109 @@
 <script src="{{ url_for('static', filename='question-script.js') }}"></script>
 {% endblock %}
 
+{% block style %}
+<link rel="stylesheet"
+    href="{{ url_for('static', filename='question-style.css') }}">
+{% endblock %}
+
 {% block body %}
 
 <body>
     <div id="title-and-time">
         <h1>
-            {{ test }}: {{ question_number }}
+            {{ test }}: Question {{ question_number }}
         </h1>
 
-        <span>
+        <span id="timer-type">
             {{ timer_type }}
         </span>
 
         <span id="timer"></span>
     </div>
 
-    <form>
-        <fieldset id="question">
+    <fieldset id="question">
+        <legend>
+            {{ question_type }} Question
+        </legend>
+
+        {% block question %} {% endblock %}
+    </fieldset>
+
+    <fieldset class="not-bordered palette">
+        {% for section in sections %}
+
+        <fieldset class="not-bordered palette section">
             <legend>
-                {{ question_type }} Question
+                {{ section['name'] }}
             </legend>
 
-            {% block question %} {% endblock %}
-        </fieldset>
+            {% for question in section['questions'] %}
 
-        <fieldset class="not-bordered palette">
-            {% for section in sections %}
+            {% set number = question['question-number'] %}
+            {% set marked = question['marked'] %}
+            {% set visited = question['visited'] %}
 
-                <fieldset class="not-bordered palette section">
-                    <legend>
-                        {{ section['name'] }}
-                    </legend>
-
-                    {% for question in section['questions'] %}
-
-                        {% set number = question['question-number'] %}
-                        {% set marked = question['marked'] %}
-                        {% set answered = question['answered'] %}
-
-                        <input type="button"
-                            value="{{ number }}"
-                            class="palette button {{ marked }} {{ answered }}"
-                            onclick="go_to_question({{ number }})">
-                            
-                    {% endfor %}
-                </fieldset>
+            <input type="button"
+                value="{{ number }}"
+                id="question-{{ number }}"
+                class="palette button {{ marked }} {{ visited }}"
+                onclick="go_to_question({{ number }})">
 
             {% endfor %}
         </fieldset>
 
+        {% endfor %}
+    </fieldset>
 
-        <fieldset id="controls"
-            class="not-bordered">
-            <input type="button"
-                value="Previous"
-                class="control"
-                onclick="go_to_previous_question({{ question_number }})">
+    <table id="statistics">
+        <tr>
+            <th>Answered</th>
+            <td id="answered-count">{{ counts['answered'] }}</td>
+        </tr>
+        <tr>
+            <th>Unanswered</th>
+            <td id="unanswered-count">{{ counts['unanswered'] }}</td>
+        </tr>
+        <tr>
+            <th>Marked for review</th>
+            <td id="marked-count">{{ counts['marked'] }}</td>
+        </tr>
+        <tr>
+            <th>Unvisited</th>
+            <td id="unvisited-count">{{ counts['unvisited'] }}</td>
+        </tr>
+    </table>
 
-            <input type="button"
-                value="Next"
-                class="control"
-                onclick="go_to_next_question({{ question_number }})">
-            <input type="button"
-                value="Mark"
-                class="control"
-                onclick="mark_question({{ question_number }})">
-            <input type="button"
-                value="Quit"
-                class="control"
-                onclick="quit_test()">
-            <input type="submit"
-                value="Submit"
-                class="control">
-        </fieldset>
-    </form>
+
+    <fieldset id="controls"
+        class="not-bordered">
+        <input type="button"
+            value="Previous"
+            class="control"
+            id="previous"
+            onclick="go_to_previous_question({{ question_number }})"
+            {{ previous_question_disabled }}>
+        <input type="button"
+            value="Next"
+            class="control"
+            id="next"
+            onclick="go_to_next_question({{ question_number }})"
+            {{ next_question_disabled }}>
+        <input type="button"
+            value="{{ mark_button_text }}"
+            class="control"
+            id="mark"
+            onclick="mark_question({{ question_number }})">
+        <input type="button"
+            value="Quit"
+            class="control"
+            id="quit"
+            onclick="quit_test()">
+        <input type="button"
+            value="Submit"
+            id="submit"
+            class="control">
+    </fieldset>
 </body>
 
 {% endblock %}

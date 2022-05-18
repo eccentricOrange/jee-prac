@@ -8,6 +8,11 @@ Configure Test
 <script src="{{ url_for('static', filename='configure-test-script.js') }}"></script>
 {% endblock %}
 
+{% block style %}
+<link rel="stylesheet"
+    href="{{ url_for('static', filename='config-style.css') }}">
+{% endblock %}
+
 {% block body %}
 
 <body>

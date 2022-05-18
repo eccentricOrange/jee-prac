@@ -46,8 +46,8 @@ function get_new_section(section_number) {
     questions_type_div.appendChild(questions_type_select);
 
     // input for questions count
-    var number_of_questions__div = field_container.cloneNode(true);
-    number_of_questions__div.innerHTML = "Number of questions"
+    var number_of_questions_div = field_container.cloneNode(true);
+    number_of_questions_div.innerHTML = "Number of questions"
 
     var number_of_questions_input = document.createElement("input");
     number_of_questions_input.setAttribute("type", "number");
@@ -55,7 +55,7 @@ function get_new_section(section_number) {
     number_of_questions_input.setAttribute("id", `section-${section_number}-number-of-questions`);
     number_of_questions_input.setAttribute("required", "");
 
-    number_of_questions__div.appendChild(number_of_questions_input);
+    number_of_questions_div.appendChild(number_of_questions_input);
 
     // input for marks if correct
     var marks_if_correct_div = field_container.cloneNode(true);
@@ -104,7 +104,7 @@ function get_new_section(section_number) {
     host_section.appendChild(section_heading);
     host_section.appendChild(name_div);
     host_section.appendChild(questions_type_div);
-    host_section.appendChild(number_of_questions__div);
+    host_section.appendChild(number_of_questions_div);
     host_section.appendChild(number_of_questions_div);
     host_section.appendChild(marks_if_correct_div);
     host_section.appendChild(marks_if_unattempted_div);
