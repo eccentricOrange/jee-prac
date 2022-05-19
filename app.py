@@ -1,10 +1,10 @@
+from datetime import datetime, timedelta
 from pathlib import Path
 from flask import Flask, render_template, request, redirect, send_file
 from http import HTTPStatus
 from json import dump, load, loads, dumps
 from re import match
 from os import environ
-from datetime import datetime
 from sqlite3 import connect
 
 app = Flask(__name__)
@@ -14,9 +14,6 @@ SCHEMA_PATH = Path('data') / 'schema.sql'
 USER_DIRECTORY = Path('data') if environ.get("JEE_PRAC_DEVELOPMENT") else Path().home() / '.jee-prac'
 BACKUP_FILE_PATH = USER_DIRECTORY / 'jee-prac-session-bkp.json'
 MAIN_DATABASE_PATH = USER_DIRECTORY / 'jee-prac-database.db'
-
-most_recent_timestamp = datetime.now()
-outage_delay = datetime.now()
 
 chosen_test_data = {}
 backup_data = {}
@@ -39,39 +36,37 @@ def create_file_system():
 
 
 def back_up_recovery_data():
-    global most_recent_timestamp, chosen_test_data, question_section_mapping, counts, backup_data, outage_delay
+    global chosen_test_data, question_section_mapping, counts, outage_time
 
     with open(BACKUP_FILE_PATH, 'w') as backup_file:
         backup_data = {
             'chosen-test-data': chosen_test_data,
             'question-section-mapping': question_section_mapping,
             'counts': counts,
-            'most-recent-timestamp': most_recent_timestamp.isoformat(),
-            'outage-delay': outage_delay.isoformat()
+            'last-known-time': datetime.now().isoformat(),
+            'outage-time': outage_time.isoformat()
         }
 
         dump(backup_data, backup_file)
 
 def restore_recovery_data():
-    global most_recent_timestamp, chosen_test_data, question_section_mapping, counts, backup_data, outage_delay
+    global chosen_test_data, question_section_mapping, counts, outage_time
 
     if BACKUP_FILE_PATH.exists():
         with open(BACKUP_FILE_PATH, 'r') as backup_file:
             backup_data = load(backup_file)
 
-            most_recent_timestamp = datetime.fromisoformat(backup_data['most-recent-timestamp'])
-            outage_delay = datetime.fromisoformat(backup_data['outage-delay']) + (datetime.now() - most_recent_timestamp)
-
             chosen_test_data = backup_data['chosen-test-data']
             question_section_mapping = backup_data['question-section-mapping']
             counts = backup_data['counts']
+            outage_time = datetime.fromisoformat(backup_data['outage-time']) + (datetime.now() - datetime.fromisoformat(backup_data['last-known-time']))
 
         return True
 
     return False
 
 def make_questions():
-    global chosen_test_data
+    global chosen_test_data, start_time, question_section_mapping, counts, outage_time
     question_number = 1
 
     for section_number, section in enumerate(chosen_test_data['sections']):
@@ -95,8 +90,8 @@ def make_questions():
     counts['unanswered'] = question_number
     counts['unvisited'] = question_number
     chosen_test_data['total-number-of-questions'] = question_number
-    chosen_test_data['start-time'] = datetime.now().isoformat()
-
+    start_time = datetime.now()
+    outage_time = datetime.fromtimestamp(0)
 
 @app.route('/jee/', methods=['GET', 'POST'])
 def select_test_type():
@@ -133,6 +128,7 @@ def receive_test_type():
 
                     if form_data['test-type'] in template_tests:
                         chosen_test_data = template_tests[form_data['test-type']]
+                        chosen_test_data['timing-type'] = form_data['timing-type']
 
                         if form_data['timing-type'] != 'set-time':
 
@@ -209,11 +205,14 @@ def start_test():
 
 @app.route('/jee/question', methods=['GET', 'POST'])
 def get_question():
-    global chosen_test_data, question_section_mapping, counts
+    global chosen_test_data, question_section_mapping, counts, start_time, outage_time
 
     if chosen_test_data and chosen_test_data['sections'] and question_section_mapping:
+
         question_number = int(request.args.get('question-number'))  # type: ignore
+
         for lower, upper, section_number in question_section_mapping:
+
             if lower <= question_number <= upper:
                 section = chosen_test_data['sections'][section_number]
 
@@ -228,6 +227,15 @@ def get_question():
                         if question['visited'] == 'unvisited':
                             question['visited'] = 'visited'
                             counts['unvisited'] -= 1
+
+                        if chosen_test_data['timing-type'] != 'untimed':
+                            time_remaining = datetime.fromtimestamp(chosen_test_data['duration'] * 60) - ((datetime.now() - start_time) + outage_time)
+                            time_remaining_string = datetime.fromtimestamp(time_remaining.total_seconds()).isoformat()
+                            timer_type = "Time Remaining"
+                        
+                        else:
+                            timer_type = "Untimed Test"
+                            time_remaining_string = ""
 
                         if section['type'] == 'mcq':
                             choices = [
@@ -249,7 +257,9 @@ def get_question():
                                 counts=counts,
                                 next_question_disabled=next_question_disabled,
                                 previous_question_disabled=previous_question_disabled,
-                                mark_button_text=mark_button_text
+                                mark_button_text=mark_button_text,
+                                timer_type=timer_type,
+                                time_remaining_string=time_remaining_string
                             ), HTTPStatus.OK
                         
                         elif section['type'] == 'numeric':
@@ -264,7 +274,9 @@ def get_question():
                                 counts=counts,
                                 next_question_disabled=next_question_disabled,
                                 previous_question_disabled=previous_question_disabled,
-                                mark_button_text=mark_button_text
+                                mark_button_text=mark_button_text,
+                                timer_type=timer_type,
+                                time_remaining_string=time_remaining_string
                             ), HTTPStatus.OK
 
                         else:
@@ -368,10 +380,7 @@ def receive_value():
 
 @app.route('/jee/quit', methods=['GET'])
 def quit():
-    global chosen_test_data, question_section_mapping, counts, backup_data, outage_delay, most_recent_timestamp
-
-    most_recent_timestamp = datetime.now()
-    outage_delay = datetime.now()
+    global chosen_test_data, question_section_mapping, counts, backup_data
 
     chosen_test_data = {}
     backup_data = {}
@@ -390,9 +399,8 @@ def quit():
 
 @app.route('/jee/submit', methods=['GET'])
 def submit():
+    global chosen_test_data, question_section_mapping, counts, backup_data, start_time, outage_time
     END_TIME = datetime.now()
-
-    global chosen_test_data, question_section_mapping, counts, backup_data, outage_delay, most_recent_timestamp
 
     if chosen_test_data and chosen_test_data['sections'] and question_section_mapping:
         
@@ -401,9 +409,9 @@ def submit():
             exam_data = (
                 chosen_test_data['name'],
                 chosen_test_data['duration'],
-                chosen_test_data['start-time'],
+                start_time.isoformat(),
                 END_TIME.isoformat(),
-                outage_delay.isoformat()
+                outage_time.isoformat()
             )
 
             exam_id: int = connection.execute("""
@@ -429,9 +437,6 @@ def submit():
                     """, (section_id, question['question-number'], question['value'], question['marked']))
 
         connection.close()
-
-        most_recent_timestamp = datetime.now()
-        outage_delay = datetime.now()
 
         chosen_test_data = {}
         backup_data = {}

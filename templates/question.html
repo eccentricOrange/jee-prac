@@ -5,6 +5,10 @@
 {% endblock %}
 
 {% block script %}
+<script>
+    const time_remaining_string = "{{ time_remaining_string }}";
+    const timer_type = "{{ timer_type }}";
+</script>
 <script src="{{ url_for('static', filename='question-script.js') }}"></script>
 {% endblock %}
 
@@ -15,7 +19,7 @@
 
 {% block body %}
 
-<body>
+<body onload="init()">
     <div id="title-and-time">
         <h1>
             {{ test }}: Question {{ question_number }}
