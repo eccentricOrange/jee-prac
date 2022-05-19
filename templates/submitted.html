@@ -1,0 +1,29 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Test submitted
+{% endblock %}
+
+{% block script %} {% endblock %}
+
+{% block style %}
+    <link rel="stylesheet"
+        href="{{ url_for('static', filename='config-style.css') }}">
+{% endblock %}
+
+{% block body %}
+
+    <body>
+        <p>
+            Your test has been submitted successfully. You may either download the results or go back to the home page.
+        </p>
+
+        <input type="button"
+            value="Download Results CSV"
+            onclick="window.location.href='/jee/download'">
+        <input type="button"
+            value="Go back to home page"
+            onclick="window.location.href='/jee/'">
+    </body>
+
+{% endblock %}

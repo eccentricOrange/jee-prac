@@ -1,3 +1,7 @@
 __pycache__
 .python-version
 exp*
+.vscode
+.env
+data/*
+!data/schema.sql
