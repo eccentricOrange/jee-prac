@@ -30,7 +30,8 @@ def make_questions():
                 'question-number': question_number + counter,
                 'value': "",
                 'visited': "unvisited",
-                'marked': "unmarked"
+                'marked': "unmarked",
+                'answered': "unanswered"
             }
             for counter in range(section['number-of-questions'])
         ]
@@ -54,7 +55,7 @@ def select_test_type():
         with open(TEMPLATE_TESTS_PATH, 'r') as template_tests_file:
             template_tests = load(template_tests_file)
 
-        return render_template('select-test-type.html', jsonfile=template_tests), HTTPStatus.OK
+        return render_template('select-test-type.html', template_tests=template_tests), HTTPStatus.OK
 
     return "", HTTPStatus.IM_USED
 
@@ -234,7 +235,7 @@ def mark():
 
                 for question in section['questions']:
                     if question['question-number'] == question_number:
-                        questions[section_number]['questions'][question_number - 1]['marked'] = 'marked'
+                        question['marked'] = 'marked'
 
                         counts['marked'] += 1
 
@@ -260,7 +261,7 @@ def unmark():
 
                 for question in section['questions']:
                     if question['question-number'] == question_number:
-                        questions[section_number]['questions'][question_number - 1]['marked'] = 'unmarked'
+                        question['marked'] = 'unmarked'
 
                         counts['marked'] -= 1
 
@@ -277,7 +278,7 @@ def receive_value():
     global chosen_test_data, questions, question_section_mapping, counts
 
     if chosen_test_data and questions and question_section_mapping:
-        form_data = request.form
+        form_data = dict(request.get_json(force=True))
         question_number = int(form_data['question-number'])
         value = form_data['value']
 
@@ -287,17 +288,19 @@ def receive_value():
 
                 for question in section['questions']:
                     if question['question-number'] == question_number:
-                        old_value = questions[section_number]['questions'][question_number - 1]['value']
+                        old_value = question['value']
 
                         if (not old_value) and value:
-                            counts['unattempted'] -= 1
-                            counts['attempted'] += 1
+                            counts['unanswered'] -= 1
+                            counts['answered'] += 1
+                            question['answered'] = 'answered'
 
                         if old_value and not value:
-                            counts['attempted'] -= 1
-                            counts['unattempted'] += 1
+                            counts['answered'] -= 1
+                            counts['unanswered'] += 1
+                            question['answered'] = 'unanswered'
 
-                        questions[section_number]['questions'][question_number - 1]['value'] = value
+                        question['value'] = value
 
                         return "", HTTPStatus.OK
 

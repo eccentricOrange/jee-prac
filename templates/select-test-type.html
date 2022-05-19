@@ -6,7 +6,7 @@ Configure Test
 
 {% block script %}
 <script>
-    const jsonfile = JSON.parse('{{ jsonfile | tojson | safe}}');
+    const template_tests = JSON.parse('{{ template_tests | tojson | safe}}');
 </script>
 <script src="{{ url_for('static', filename='select-test-type-script.js') }}"></script>
 {% endblock %}

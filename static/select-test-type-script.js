@@ -7,7 +7,7 @@ function init() {
 
     form.querySelector("#timing-type").value = "set-time";
 
-    const time = jsonfile[default_test]["duration"];
+    const time = template_tests[default_test]["duration"];
     form.querySelector("#duration").value = time;
     form.querySelector("#duration").setAttribute("disabled", "disabled");
 }
@@ -29,7 +29,7 @@ function update_duration_on_test_change() {
     
     if (form.querySelector("#timing-type").value == "set-time") {
         const test_type = form.querySelector("#test-type");
-        const time = jsonfile[test_type.value]["duration"];
+        const time = template_tests[test_type.value]["duration"];
         form.querySelector("#duration").value = time;
     }
 

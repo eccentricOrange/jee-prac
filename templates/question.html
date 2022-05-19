@@ -28,7 +28,7 @@
         <span id="timer"></span>
     </div>
 
-    <fieldset id="question">
+    <fieldset id="question-section">
         <legend>
             {{ question_type }} Question
         </legend>
@@ -49,11 +49,12 @@
             {% set number = question['question-number'] %}
             {% set marked = question['marked'] %}
             {% set visited = question['visited'] %}
+            {% set answered = question['answered'] %}
 
             <input type="button"
                 value="{{ number }}"
                 id="question-{{ number }}"
-                class="palette button {{ marked }} {{ visited }}"
+                class="palette button {{ marked }} {{ visited }} {{ answered }}"
                 onclick="go_to_question({{ number }})">
 
             {% endfor %}

@@ -12,8 +12,8 @@
                     name="question"
                     id="{{ choice_option }}"
                     value="{{ choice_option }}"
-                    onsubmit="mcq_store_value()"
-                    onchange="mcq_store_value()"
+                    onsubmit="mcq_store_value({{ question_number }})"
+                    onchange="mcq_store_value({{ question_number }})"
                     {{
                     choice_value
                     }}>
@@ -24,6 +24,6 @@
 
         <input type="button"
             value="Clear"
-            onclick="clear_mcq()">
+            onclick="clear_mcq({{ question_number }})">
 
     {% endblock %}
