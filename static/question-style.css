@@ -49,6 +49,7 @@ input.palette.button {
     height: 30px;
     width: 30px;
     display: inline-block;
+    margin: 2px 0;
 }
 
 fieldset.section legend {
@@ -84,7 +85,8 @@ input.control#quit {
 table {
     border-collapse: collapse;
     border: 1px solid black;
-    margin: 2%;
+    margin: 10px 40px;
+    font-family: sans-serif;
 }
 
 table td, table th {
