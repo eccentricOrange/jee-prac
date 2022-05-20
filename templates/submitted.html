@@ -1,32 +1,33 @@
 {% extends "layout.html" %}
 
 {% block title %}
-Submitted
+    Test submitted
 {% endblock %}
 
-{% block script %}
-<script src="{{ url_for('static', filename='submitted_script.js') }}"></script>
+{% block script %} {% endblock %}
+
+{% block style %}
+    <link rel="stylesheet"
+        href="{{ url_for('static', filename='config-style.css') }}">
 {% endblock %}
 
 {% block body %}
+    <body>
+        <h1>Submitted</h1>
+        <p>
+            Your test has been submitted successfully. You may either download the results or go back to the home page.
+        </p>
 
-<body>
-    <h1>
-        Your exam has been successfully submitted. You can now close this window.
-    </h1>
+        <input type="button"
+            value="Download Results CSV"
+            onclick="window.location.href='/jee/download'"
+            name="download-csv"
+            id="download-csv">
+        <input type="button"
+            value="Go back to home page"
+            onclick="window.location.href='/jee/'"
+            name="go-back-home"
+            id="go-back-home">
+    </body>
 
-    <br>
-
-    <button onclick="new_exam()"
-        class="controls"
-        id="new_exam">
-        Configure New Exam
-    </button>
-
-    <button onclick="window.location.href='/jee/downloads'"
-        class="controls"
-        id="downloads">
-        Go to downloads page
-    </button>
-</body>
 {% endblock %}

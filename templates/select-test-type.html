@@ -1,0 +1,80 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Configure Test
+{% endblock %}
+
+{% block script %}
+<script>
+    const template_tests = JSON.parse('{{ template_tests | tojson | safe}}');
+</script>
+<script src="{{ url_for('static', filename='select-test-type-script.js') }}"></script>
+{% endblock %}
+
+{% block style %}
+<link rel="stylesheet"
+    href="{{ url_for('static', filename='config-style.css') }}">
+{% endblock %}
+
+{% block body %}
+
+<body onload="init()">
+    <h1>
+        Select the type of exam
+    </h1>
+
+    <form id="select-test-type-form"
+        method="post"
+        action="/jee/receive-test-type">
+        <fieldset>
+            <legend>Choose an exam type</legend>
+            <select name="test-type"
+                id="test-type"
+                required
+                onchange="update_duration_on_test_change()">
+                <option value="jee-mains">JEE Mains</option>
+                <option value="jee-mains-old">JEE Mains (Old Pattern)</option>
+                <option value="jee-adv"
+                    disabled>JEE Advanced</option>
+                <option value="bitsat">BITSAT</option>
+                <option value="kcet">KCET</option>
+                <option value="viteee">VITEEE</option>
+                <option value="ugee">IIIT-H UGEE</option>
+                <option value="custom">[Custom]</option>
+            </select>
+        </fieldset>
+
+        <fieldset>
+            <legend>Duration</legend>
+            <label for="timing-type">Type of timing system</label>
+            <select name="timing-type"
+                id="timing-type"
+                required
+                onchange="update_duration_on_timing_type_change()">
+                <option value="set-time"
+                    id="set-time"
+                    selected>Standard duration</option>
+                <option value="custom-time"
+                    id="custom-time">Custom duration</option>
+                <option value="untimed"
+                    id="untimed">Untimed</option>
+            </select>
+
+            <label for="duration">Duration (in minutes)</label>
+            <input type="number"
+                name="duration"
+                id="duration"
+                value=180
+                disabled>
+
+        </fieldset>
+
+        <input type="reset"
+            value="Reset form"
+            onclick="init()">
+        <input type="submit"
+            value="Continue">
+    </form>
+</body>
+
+{% endblock %}

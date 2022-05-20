@@ -1,429 +1,536 @@
-from flask import Flask, render_template, request, redirect, send_file
-from json import dumps, loads
+from datetime import datetime, timedelta
 from pathlib import Path
-from datetime import datetime
+from flask import Flask, render_template, request, redirect, send_file
 from http import HTTPStatus
-from sqlite3 import connect
-from csv import writer
+from json import dump, load, loads, dumps
+from re import match
+from os import environ
+from sqlite3 import connect, Row
+from csv import DictWriter
 
 app = Flask(__name__)
-questions_status = {}  # store data about each question while a test is live
-test_data = {}  # store data about the test in general while it is live
-recovery_data = {}  # store data about multiple parameters to use for recovery
-start_time = datetime.now()  # time of starting the test
-test_submitted = False  # flag to indicate if the test has been submitted
-last_known_time = datetime.now()  # time of the last interaction before error
 
-# template to create a new question
-NEW_QUESTION = {
-    'number': 0,
-    'visit': "unvisited",
-    'answer': "unanswered",
-    'mark': "unmarked",
-    'value': None,
-    'type': None,
-    'subject': None
+DEVELOPMENT_MODE = bool(environ.get("JEE_PRAC_DEVELOPMENT"))
+
+SCHEMA_PATH = Path('data') / 'schema.sql'
+ACTIVE_DIRECTORY = Path('data') if DEVELOPMENT_MODE else Path().home() / '.jee-prac'
+BACKUP_FILE_PATH = ACTIVE_DIRECTORY / 'jee-prac-session-bkp.json'
+MAIN_DATABASE_PATH = ACTIVE_DIRECTORY / 'jee-prac-database.db'
+TEMPLATE_TESTS_PATH = ACTIVE_DIRECTORY / 'preconfigured-exams.json'
+
+chosen_test_data = {}
+backup_data = {}
+question_section_mapping = []
+counts = {
+    'answered': 0,
+    'unanswered': 0,
+    'marked': 0,
+    'unvisited': 0
 }
+test_in_progress = False
+test_selected = False
+test_configured = False
 
-# subjects examined
-SUBJECTS = [
-    'physics',
-    'chemistry',
-    'mathematics'
-]
+def create_file_system():
+    ACTIVE_DIRECTORY.mkdir(parents=True, exist_ok=True)
+    MAIN_DATABASE_PATH.touch(exist_ok=True)
 
-# types of questions
-TYPES = [
-    'mcq',
-    'numeric'
-]
+    with open(SCHEMA_PATH, 'r') as schema_file, connect(MAIN_DATABASE_PATH) as connection:
+        connection.executescript(schema_file.read())
 
-# main folder for a given user
-FOLDER = Path().home() / '.jee-prac'
+    connection.close()
 
-SCHEMA_PATH = Path(__file__).parent / 'schema.sql'  # path to the schema file
-DB_PATH = FOLDER / 'jee.db'  # path to the database
-RECOVERY_FILE = FOLDER / 'recovery.json'  # path to the recovery file
-EXAMS_CSV_FILE = FOLDER / 'exams.csv'  # path to the (temporary) exams csv file
-QUESTIONS_CSV_FILE = FOLDER / 'questions.csv'  # path to the (temporary) questions csv file
+    if not (DEVELOPMENT_MODE or TEMPLATE_TESTS_PATH.exists()):
+        TEMPLATE_TESTS_PATH.touch(exist_ok=True)
+        TEMPLATE_TESTS_PATH.write_text((Path('data') / 'preconfigured-exams.json').read_text())
 
-# setup the storage (files, folders, DB) for the application
-def setup_storage():
-    FOLDER.mkdir(exist_ok=True, parents=True)  # create the folder if it doesn't exist
 
-    # create the DB from the schema if it doesn't exist and connect to it
-    with connect(DB_PATH) as connection:
-        with open(SCHEMA_PATH, 'r') as f:
-            connection.executescript(f.read())
-            connection.commit()
+def back_up_recovery_data():
+    global chosen_test_data, question_section_mapping, counts, outage_time
 
-# generate the list of questions for a given exam
-def produce_list_of_questions(exam_data: dict):
-    questions = {}
-    question_number = 1
+    with open(BACKUP_FILE_PATH, 'w') as backup_file:
+        backup_data = {
+            'chosen-test-data': chosen_test_data,
+            'question-section-mapping': question_section_mapping,
+            'counts': counts,
+            'last-known-time': datetime.now().isoformat(),
+            'outage-time': outage_time.isoformat()
+        }
 
-    for subject_no, subject in enumerate(SUBJECTS, start=1):
-        for type_no, type in enumerate(TYPES, start=1):
+        dump(backup_data, backup_file)
 
-            for i in range(1, int(exam_data[f"{subject}_{type}"]) + 1):
+def restore_recovery_data():
+    global chosen_test_data, question_section_mapping, counts, outage_time, start_time, test_in_progress, test_selected, test_configured
 
-                question = NEW_QUESTION.copy()
-                question['number'] = question_number
-                question['subject'] = subject
-                question['type'] = type
-                questions[str(question_number)] = question
-                question_number += 1
+    if BACKUP_FILE_PATH.exists():
+        with open(BACKUP_FILE_PATH, 'r') as backup_file:
+            backup_data = load(backup_file)
 
-    return questions
+            chosen_test_data = backup_data['chosen-test-data']
+            question_section_mapping = backup_data['question-section-mapping']
+            counts = backup_data['counts']
+            outage_time = datetime.fromisoformat(backup_data['outage-time']) + (datetime.now() - datetime.fromisoformat(backup_data['last-known-time']))
+            start_time = datetime.fromisoformat(backup_data['last-known-time'])
+            test_in_progress = True
+            test_selected = True
+            test_configured = True
 
-# count the number questions answered, unanswered, and marked
-def count_questions():
-    counts = {
-        'unanswered': 0,
-        'answered': 0,
-        'marked': 0
-    }
+        return True
 
-    for question_number, question in questions_status.items():
-        if (not question['value']) and (question['value'] != "null"):
-            counts['unanswered'] += 1
-
-        else:
-            counts['answered'] += 1
-
-        if question['mark'] == "marked":
-            counts['marked'] += 1
-
-    return counts
-
-# save the recovery data to the recovery file
-def save_recovery_data():
-    global recovery_data, questions_status, last_known_time
-
-    last_known_time = datetime.now()  # update the last known time
-    recovery_data['questions_status'] = questions_status  # update the questions status
-    recovery_data['last_known_time'] = last_known_time.isoformat()  # update the last known time
-
-    # write the recovery data to the recovery file
-    with open(RECOVERY_FILE, 'w') as recovery:
-        recovery.write(dumps(recovery_data))
-
-# check if the recovery data exists and if it does, load it
-def check_recovery_data():
-    global recovery_data, questions_status, test_data, start_time, last_known_time
-
-    if RECOVERY_FILE.exists():
-        with open(RECOVERY_FILE, 'r') as recovery:
-            recovery_data = recovery.read()
-
-            if recovery_data:
-                recovery_data = loads(recovery_data)
-                questions_status = recovery_data['questions_status']
-                test_data = recovery_data['test_data']
-                last_known_time = datetime.fromisoformat(recovery_data['last_known_time'])
-
-                # account for time loss due to crash, so that the candidate does not get penalized
-                start_time = datetime.fromisoformat(recovery_data['start_time']) + (datetime.now() - last_known_time)
-
-                return True
     return False
 
-# convert post-exam data to CSV
-def convert_to_csv(file_type: str):
+def make_questions():
+    global chosen_test_data, start_time, question_section_mapping, counts, outage_time
+    question_number = 1
 
-    # connect to the DB
-    with connect(DB_PATH) as connection:
-        cursor = connection.cursor()
-    
-        # if the user is looking at the file that stores exam metadata
-        if file_type == 'exams':
-            EXAMS_CSV_FILE.touch(exist_ok=True)  # create the file if it doesn't exist
+    for section_number, section in enumerate(chosen_test_data['sections']):
+        section['questions'] = [
+            {
+                'question-number': question_number + counter,
+                'value': "",
+                'visited': "unvisited",
+                'marked': "unmarked",
+                'answered': "unanswered"
+            }
+            for counter in range(section['number-of-questions'])
+        ]
 
-            with open(EXAMS_CSV_FILE, 'w') as exams_csv:
+        question_number += section['number-of-questions']
 
-                exams_headers = ["exam_id", "start_time", "end_time"]
+        question_section_mapping.append((section['questions'][0]['question-number'], section['questions'][-1]['question-number'], section_number))
 
-                exams_data = cursor.execute(f"SELECT {', '.join(exams_headers)} FROM exams").fetchall()  # get the data from the DB
-                
-                # write the data to the CSV file
-                exams_writer = writer(exams_csv)
-                exams_writer.writerow(exams_headers)
-                exams_writer.writerows(exams_data)
+    question_number -= 1
 
-        # if the user is looking at the file that stores questions
-        elif file_type == 'questions':
-                
-                QUESTIONS_CSV_FILE.touch(exist_ok=True)  # create the file if it doesn't exist
-    
-                with open(QUESTIONS_CSV_FILE, 'w') as questions_csv:
-    
-                    questions_headers = ["question_id", "question_number", "exam_id", "type", "subject", "value"]
-    
-                    questions_data = cursor.execute(f"SELECT {', '.join(questions_headers)} FROM questions").fetchall()  # get the data from the DB
-                    
-                    # write the data to the CSV file
-                    questions_writer = writer(questions_csv)
-                    questions_writer.writerow(questions_headers)
-                    questions_writer.writerows(questions_data)
+    counts['unanswered'] = question_number
+    counts['unvisited'] = question_number
+    chosen_test_data['total-number-of-questions'] = question_number
+    start_time = datetime.now()
+    outage_time = datetime.fromtimestamp(0)
 
-        # if the user is looking at the file that does not exist
-        else:
-            raise Exception(f"Invalid file type: {file_type}")  # yell at them
+def create_csv_from_db(table_name: str) -> Path:
+    csv_filepath = ACTIVE_DIRECTORY / f'{table_name}.csv'
+    csv_filepath.touch(exist_ok=True)
 
-# entry point for the application
-# this is where the user will configure a test and start it
+    with connect(MAIN_DATABASE_PATH) as connection, open(csv_filepath, 'w') as csv_file:
+        connection.row_factory = Row
+        db_data = connection.execute(f'SELECT * FROM {table_name}').fetchall()
+        csv_writer = DictWriter(csv_file, fieldnames=db_data[0].keys())
+        csv_writer.writeheader()
+        csv_writer.writerows(map(dict, db_data))
+
+    return csv_filepath
+
+
 @app.route('/jee/', methods=['GET', 'POST'])
-def index():
-    return render_template('index.html'), HTTPStatus.OK
+def select_test_type():
+    global test_in_progress
+    
+    if not test_in_progress:
+        with open(TEMPLATE_TESTS_PATH, 'r') as template_tests_file:
+            template_tests = load(template_tests_file)
 
-# this is where the user will start the test
-# numbers of questions and time are received from a form submitted by the user
-@app.route('/jee/start', methods=['GET'])
-def start():
+        return render_template('select-test-type.html', template_tests=template_tests), HTTPStatus.OK
 
-    # if there are arguments in the URL
-    if request.args:
-        global test_data, questions_status, start_time, recovery_data
+    return "", HTTPStatus.IM_USED
 
-        # load the data into variables
-        test_data = request.args.to_dict()
-        questions_status = produce_list_of_questions(test_data)
-        start_time = datetime.now()
+@app.route('/jee/configure-test/', methods=['GET', 'POST'])
+def configure_test():
+    global test_in_progress, test_selected, test_configured
 
-        # create the recovery file and write the data to it
-        RECOVERY_FILE.touch()
-        recovery_data = {
-            'test_data': test_data,
-            'start_time': start_time.isoformat()
-        }
-        save_recovery_data()
+    if test_selected and not (test_in_progress or test_configured):
+        return render_template('configure-test.html'), HTTPStatus.OK
 
-        # redirect the user to the first question
-        return redirect('/jee/question?number=1')
+    return "", HTTPStatus.IM_USED
 
-    return "", HTTPStatus.BAD_REQUEST
+@app.route('/jee/receive-test-type', methods=['POST'])
+def receive_test_type():
+    global chosen_test_data, test_in_progress, test_selected, test_configured
+    
+    if not (test_in_progress or test_selected or test_configured):
+        if request.method == 'POST':
+            form_data = request.form
 
-# 
-@app.route('/jee/get_questions_status', methods=['GET'])
-def get_questions_status():
-    global questions_status
-    if questions_status:
-        return dumps(questions_status), HTTPStatus.OK
+            if form_data['test-type'] != 'custom':
+                with open(TEMPLATE_TESTS_PATH, 'r') as template_tests_file:
+                    template_tests = load(template_tests_file)
 
-    return "", HTTPStatus.NOT_FOUND
+                    if form_data['test-type'] in template_tests:
+                        chosen_test_data = template_tests[form_data['test-type']]
+                        chosen_test_data['timing-type'] = form_data['timing-type']
+
+                        if form_data['timing-type'] != 'set-time':
+
+                            if form_data['timing-type'] == 'custom-time':
+                                chosen_test_data['duration'] = int(form_data['duration'])
+
+                            else:
+                                chosen_test_data['duration'] = 0
+
+                        test_selected = True
+                        test_configured = True
+                        return redirect('/jee/start-test'), HTTPStatus.TEMPORARY_REDIRECT
+
+                    return "", HTTPStatus.BAD_REQUEST
+            
+            chosen_test_data['timing-type'] = form_data['timing-type']
+            chosen_test_data['duration'] = int(form_data['duration']) if form_data['timing-type'] == 'custom-time' else 0
+            return render_template('configure-test.html'), HTTPStatus.OK
+
+        return '', HTTPStatus.BAD_REQUEST
+
+    return '', HTTPStatus.IM_USED
+
+@app.route('/jee/receive-test-config', methods=['POST'])
+def receive_test_config():
+    global chosen_test_data, test_in_progress, test_selected, test_configured
+
+    if test_selected and not (test_in_progress or test_configured):
+        if request.method == 'POST':
+            form_data = request.form
+            chosen_test_data['sections'] = []
+
+            if 'exam-name' in form_data:
+                chosen_test_data['name'] = form_data['exam-name']
+
+            section_index = 0
+
+            for field in form_data:
+                if match(r'^section-\d+-name$', field):
+                    name = form_data[field]
+                    section_number = int(field.split('-')[1])
+                    section_name = name.replace(' ', '-').lower()
+
+                    if section_name not in chosen_test_data['sections']:
+                        chosen_test_data['sections'].append({
+                            'section-name': section_name,
+                            'section-number': section_number,
+                            'name': name,
+                            'type': form_data[f'section-{section_number}-questions-type'],
+                            'number-of-questions': int(form_data[f'section-{section_number}-number-of-questions']),
+                            'correct-marks': float(form_data[f'section-{section_number}-marks-if-correct']),
+                            'unattempted-marks': float(form_data[f'section-{section_number}-marks-if-unattempted']),
+                            'wrong-marks': float(form_data[f'section-{section_number}-marks-if-wrong'])
+                        })
+
+                        if chosen_test_data['sections'][section_index]['type'] == 'mcq':
+                            chosen_test_data['sections'][section_index]['options'] = ['A', 'B', 'C', 'D']
+                    
+                    section_index += 1
+
+            test_selected = True
+            test_configured = True
+            return redirect('/jee/start-test'), HTTPStatus.TEMPORARY_REDIRECT
+
+        return '', HTTPStatus.BAD_REQUEST
+
+    return '', HTTPStatus.IM_USED
 
 
-@app.route('/jee/get_question_status', methods=['GET'])
-def get_question_status():
-    if request.args and 'number' in request.args:
+@app.route('/jee/start-test', methods=['GET', 'POST'])
+def start_test():
+    global chosen_test_data, test_in_progress, test_selected, test_configured
 
-        if questions_status:
-            return dumps(questions_status[request.args.get('number')]), HTTPStatus.OK
+    if test_selected and test_configured:
+        make_questions()
+        test_in_progress = True
+        return redirect('/jee/question?question-number=1'), HTTPStatus.TEMPORARY_REDIRECT
 
-        return "", HTTPStatus.NOT_FOUND
-    return "", HTTPStatus.BAD_REQUEST
-
-
-@app.route('/jee/question', methods=['GET'])
-def question():
-    global questions_status
-
-    if request.args and 'number' in request.args:
-        if questions_status:
-            number = str(request.args.get('number'))
-
-            if questions_status[number]['visit'] == "unvisited":
-                questions_status[number]['visit'] = "visited"
-
-            question = questions_status[number]
-
-            save_recovery_data()
-            return render_template(f'{question["type"]}.html', q_no=question['number'], q_type=question["type"]), HTTPStatus.OK
-
-        return "", HTTPStatus.NOT_FOUND
-    return "", HTTPStatus.BAD_REQUEST
+    return '', HTTPStatus.NOT_IMPLEMENTED
 
 
-@app.route('/jee/store_value', methods=['POST'])
-def store_value():
-    global questions_status, recovery_data
+@app.route('/jee/question', methods=['GET', 'POST'])
+def get_question():
+    global chosen_test_data, question_section_mapping, counts, start_time, outage_time, test_in_progress
 
-    if request.args and 'number' in request.args and 'value' in request.args:
-        if questions_status:
-            number = str(request.args.get('number'))
-            value = request.args.get('value')
+    if test_in_progress:
 
-            if value == "null" or not value:
-                questions_status[number]['answer'] = "unanswered"
-                questions_status[number]['value'] = None
+        question_number = int(request.args.get('question-number'))  # type: ignore
 
-            else:
-                questions_status[number]['answer'] = "answered"
-                questions_status[number]['value'] = value
+        for lower, upper, section_number in question_section_mapping:
 
-            save_recovery_data()
-            return dumps({'status': 'success'}), HTTPStatus.OK
+            if lower <= question_number <= upper:
+                section = chosen_test_data['sections'][section_number]
 
-        return "", HTTPStatus.NOT_FOUND
-    return "", HTTPStatus.BAD_REQUEST
+                for question in section['questions']:
+                    if question['question-number'] == question_number:
+                        value = question['value']
+
+                        next_question_disabled = "disabled" if chosen_test_data['total-number-of-questions'] == question_number else ""
+                        previous_question_disabled = "disabled" if question_number == 1 else ""
+                        mark_button_text = "Mark" if question['marked'] == "unmarked" else "Unmark"
+
+                        if question['visited'] == 'unvisited':
+                            question['visited'] = 'visited'
+                            counts['unvisited'] -= 1
+
+                        if chosen_test_data['timing-type'] != 'untimed':
+                            time_remaining = datetime.fromtimestamp(chosen_test_data['duration'] * 60) - ((datetime.now() - start_time) + outage_time)
+                            time_remaining_string = datetime.fromtimestamp(time_remaining.total_seconds()).isoformat()
+                            timer_type = "Time Remaining"
+                        
+                        else:
+                            timer_type = "Untimed Test"
+                            time_remaining_string = ""
+
+                        if section['type'] == 'mcq':
+                            choices = [
+                                {
+                                    'option': option,
+                                    'value': "checked" if option == value else ""
+                                }
+                                for option in section['options']
+                            ]
+
+                            back_up_recovery_data()
+                            return render_template(
+                                'mcq.html',
+                                sections=chosen_test_data['sections'],
+                                question_number=question_number,
+                                question_type=section['name'],
+                                test=chosen_test_data['name'],
+                                choices=choices,
+                                counts=counts,
+                                next_question_disabled=next_question_disabled,
+                                previous_question_disabled=previous_question_disabled,
+                                mark_button_text=mark_button_text,
+                                timer_type=timer_type,
+                                time_remaining_string=time_remaining_string
+                            ), HTTPStatus.OK
+                        
+                        elif section['type'] == 'numeric':
+                            back_up_recovery_data()
+                            return render_template(
+                                'numeric.html',
+                                sections=chosen_test_data['sections'],
+                                question_number=question_number,
+                                question_type=section['name'],
+                                test=chosen_test_data['name'],
+                                value=question['value'],
+                                counts=counts,
+                                next_question_disabled=next_question_disabled,
+                                previous_question_disabled=previous_question_disabled,
+                                mark_button_text=mark_button_text,
+                                timer_type=timer_type,
+                                time_remaining_string=time_remaining_string
+                            ), HTTPStatus.OK
+
+                        else:
+                            return '', HTTPStatus.NOT_IMPLEMENTED
+
+        return '', HTTPStatus.NOT_IMPLEMENTED
+
+    return '', HTTPStatus.NOT_IMPLEMENTED
+
+@app.route('/jee/mark', methods=['POST'])
+def mark():
+    global chosen_test_data, question_section_mapping, counts, test_in_progress
+
+    if test_in_progress:
+        form_data = dict(request.get_json(force=True))
+        question_number = int(form_data['question-number'])
+
+        for lower, upper, section_number in question_section_mapping:
+            if lower <= question_number <= upper:
+                section = chosen_test_data['sections'][section_number]
+
+                for question in section['questions']:
+                    if int(question['question-number']) == int(question_number):
+                        question['marked'] = 'marked'
+                        counts['marked'] += 1
+                        back_up_recovery_data()
+                        return "", HTTPStatus.OK
+
+            
+        return '', HTTPStatus.INTERNAL_SERVER_ERROR
+
+    return '', HTTPStatus.NOT_IMPLEMENTED
 
 
 @app.route('/jee/unmark', methods=['POST'])
-def mark():
-    global questions_status
-    if request.args and 'number' in request.args:
-        if questions_status:
-            number = str(request.args.get('number'))
-            questions_status[number]['mark'] = "unmarked"
-
-            save_recovery_data()
-            return dumps({'status': 'success'}), HTTPStatus.OK
-
-        return "", HTTPStatus.NOT_FOUND
-    return "", HTTPStatus.BAD_REQUEST
-
-
-@app.route('/jee/mark', methods=['POST'])
 def unmark():
-    global questions_status
-    if request.args and 'number' in request.args:
-        if questions_status:
-            number = str(request.args.get('number'))
-            questions_status[number]['mark'] = "marked"
+    global chosen_test_data, question_section_mapping, counts, test_in_progress
 
-            save_recovery_data()
-            return dumps({'status': 'success'}), HTTPStatus.OK
+    if test_in_progress:
+        form_data = dict(request.get_json(force=True))
+        question_number = int(form_data['question-number'])
 
-        return "", HTTPStatus.NOT_FOUND
-    return "", HTTPStatus.BAD_REQUEST
+        for lower, upper, section_number in question_section_mapping:
+            if lower <= question_number <= upper:
+                section = chosen_test_data['sections'][section_number]
 
+                for question in section['questions']:
+                    if question['question-number'] == question_number:
+                        question['marked'] = 'unmarked'
+                        counts['marked'] -= 1
 
-@app.route('/jee/submit', methods=['POST', 'GET'])
-def submit():
-    END_TIME = datetime.now()
-    global questions_status, test_data, start_time, test_submitted
+                        back_up_recovery_data()
+                        return "", HTTPStatus.OK
 
-    if questions_status:
+            
+        return '', HTTPStatus.INTERNAL_SERVER_ERROR
 
-        with connect(DB_PATH) as connection:
-            cursor = connection.cursor()
-
-            cursor.execute(
-                "INSERT INTO exams (start_time, end_time) VALUES (?, ?);",
-                (start_time, END_TIME)
-            )
-
-            connection.commit()
-
-            exam_id = int(cursor.execute(
-                "SELECT exam_id FROM exams ORDER BY exam_id DESC LIMIT 1;"
-            ).fetchone()[0])
-
-            insertable = [
-                (
-                    int(exam_id),
-                    int(number),
-                    question_data['value'],
-                    question_data['type'],
-                    question_data['subject']
-                ) for number, question_data in questions_status.items()
-            ]
-
-            cursor.executemany(
-                "INSERT INTO questions (exam_id, question_number, value, type, subject) VALUES (?, ?, ?, ?, ?);",
-                (insertable)
-            )
-
-            connection.commit()
-
-        test_submitted = True
-
-        questions_status = {}
-        test_data = {}
-        start_time = datetime.now()
-
-        RECOVERY_FILE.unlink(missing_ok=True)
-
-        return redirect('/jee/submitted'), HTTPStatus.TEMPORARY_REDIRECT
-    return "", HTTPStatus.NOT_FOUND
+    return '', HTTPStatus.NOT_IMPLEMENTED
 
 
-@app.route('/jee/get_remaining_time', methods=['GET'])
-def get_remaining_time():
-    global start_time, test_data
+@app.route('/jee/receive-value', methods=['POST'])
+def receive_value():
+    global chosen_test_data, question_section_mapping, counts, test_in_progress
 
-    if start_time:
-        remaining_time = (
-            int(test_data['duration']) * 60) - (datetime.now() - start_time).total_seconds()
+    if test_in_progress:
+        form_data = dict(request.get_json(force=True))
+        question_number = int(form_data['question-number'])
+        value = form_data['value']
 
-        return dumps({'remaining_time': remaining_time}), HTTPStatus.OK
-    return "", HTTPStatus.NOT_FOUND
+        for lower, upper, section_number in question_section_mapping:
+            if lower <= question_number <= upper:
+                section = chosen_test_data['sections'][section_number]
 
+                for question in section['questions']:
+                    if question['question-number'] == question_number:
+                        old_value = question['value']
 
-@app.route('/jee/get_counts', methods=['GET'])
-def get_counts():
-    global questions_status
+                        if (not old_value) and value:
+                            counts['unanswered'] -= 1
+                            counts['answered'] += 1
+                            question['answered'] = 'answered'
 
-    if questions_status:
-        counts = count_questions()
+                        if old_value and not value:
+                            counts['answered'] -= 1
+                            counts['unanswered'] += 1
+                            question['answered'] = 'unanswered'
 
-        return dumps(counts), HTTPStatus.OK
-    return "", HTTPStatus.NOT_FOUND
+                        question['value'] = value
 
+                        back_up_recovery_data()
+                        return "", HTTPStatus.OK
 
-@app.route('/jee/submitted', methods=['GET'])
-def submitted():
-    global test_submitted
+            
+        return '', HTTPStatus.INTERNAL_SERVER_ERROR
 
-    if test_submitted:
-        return render_template('submitted.html'), HTTPStatus.OK
-
-    test_submitted = False
-
-    return "", HTTPStatus.BAD_REQUEST
+    return '', HTTPStatus.NOT_IMPLEMENTED
 
 
 @app.route('/jee/quit', methods=['GET'])
 def quit():
-    global questions_status, test_data, start_time
+    global chosen_test_data, question_section_mapping, counts, backup_data, test_in_progress, test_configured, test_selected
 
-    if questions_status:
-        questions_status = {}
-        test_data = {}
-        start_time = datetime.now()
+    if test_in_progress:
 
-        RECOVERY_FILE.unlink(missing_ok=True)
+        chosen_test_data = {}
+        backup_data = {}
+        question_section_mapping = []
+        counts = {
+            'answered': 0,
+            'unanswered': 0,
+            'marked': 0,
+            'unvisited': 0
+        }
+        test_in_progress = False
+        test_configured = False
+        test_selected = False
+
+        BACKUP_FILE_PATH.unlink(missing_ok=True)
 
         return redirect('/jee/'), HTTPStatus.TEMPORARY_REDIRECT
-    return "", HTTPStatus.BAD_REQUEST
+
+    return '', HTTPStatus.NOT_IMPLEMENTED
 
 
-@app.route('/jee/downloads', methods=['GET'])
-def downloads():
-    return render_template('downloads_page.html'), HTTPStatus.OK
+@app.route('/jee/submit', methods=['GET'])
+def submit():
+    global chosen_test_data, question_section_mapping, counts, backup_data, start_time, outage_time, test_in_progress, test_configured, test_selected
 
+    if test_in_progress:
+        END_TIME = datetime.now()
 
-@app.route('/jee/download_exams_csv', methods=['GET'])
-def download_exams_csv():
-    convert_to_csv('exams')
-    file = send_file(EXAMS_CSV_FILE)
-    EXAMS_CSV_FILE.unlink(missing_ok=True)
+        with connect(MAIN_DATABASE_PATH) as connection:
+
+            exam_data = (
+                chosen_test_data['name'],
+                chosen_test_data['duration'],
+                start_time.isoformat(),
+                END_TIME.isoformat(),
+                outage_time.isoformat()
+            )
+
+            exam_id: int = connection.execute("""
+                INSERT INTO exams
+                (exam_name, duration, start_time, end_time, outage_delay)
+                VALUES (?, ?, ?, ?, ?)
+                RETURNING exam_id;
+            """, exam_data).fetchone()[0]
+
+            for section in chosen_test_data['sections']:
+                section_id: int = connection.execute("""
+                    INSERT INTO sections
+                    (exam_id, section_name, section_type, correct_marks, unattempted_marks, wrong_marks)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                    RETURNING section_id;
+                """, (exam_id, section['name'], section['type'], section['correct-marks'], section['unattempted-marks'], section['wrong-marks'])).fetchone()[0]
+
+                for question in section['questions']:
+                    connection.execute("""
+                        INSERT INTO questions
+                        (section_id, question_number, attempt, marked)
+                        VALUES (?, ?, ?, ?);
+                    """, (section_id, question['question-number'], question['value'], question['marked']))
+
+        connection.close()
+
+        chosen_test_data = {}
+        backup_data = {}
+        question_section_mapping = []
+        counts = {
+            'answered': 0,
+            'unanswered': 0,
+            'marked': 0,
+            'unvisited': 0
+        }
+        test_in_progress = False
+        test_configured = False
+        test_selected = False
+
+        BACKUP_FILE_PATH.unlink(missing_ok=True)
+        return redirect('/jee/submitted'), HTTPStatus.TEMPORARY_REDIRECT
+
+    return '', HTTPStatus.NOT_IMPLEMENTED
+
+@app.route('/jee/submitted', methods=['GET'])
+def submitted():
+    return render_template('submitted.html'), HTTPStatus.OK
+
+@app.route('/jee/download', methods=['GET'])
+def download():
+    return render_template('download.html'), HTTPStatus.OK
+
+@app.route('/jee/download/exams', methods=['GET'])
+def download_exams():
+    csv_path = create_csv_from_db('exams')
+    file = send_file(csv_path)
+    csv_path.unlink(missing_ok=True)
     return file, HTTPStatus.OK
 
 
-@app.route('/jee/download_questions_csv', methods=['GET'])
-def download_questions_csv():
-    convert_to_csv('questions')
-    file = send_file(QUESTIONS_CSV_FILE)
-    QUESTIONS_CSV_FILE.unlink(missing_ok=True)
+@app.route('/jee/download/sections', methods=['GET'])
+def download_sections():
+    csv_path = create_csv_from_db('sections')
+    file = send_file(csv_path)
+    csv_path.unlink(missing_ok=True)
+    return file, HTTPStatus.OK
+
+
+@app.route('/jee/download/questions', methods=['GET'])
+def download_questions():
+    csv_path = create_csv_from_db('questions')
+    file = send_file(csv_path)
+    csv_path.unlink(missing_ok=True)
     return file, HTTPStatus.OK
 
 
 def main():
-    setup_storage()
-    check_recovery_data()
-    app.run(port=80, host='0.0.0.0')
-
+    create_file_system()
+    restore_recovery_data()
+    app.run()
 
 if __name__ == '__main__':
     main()

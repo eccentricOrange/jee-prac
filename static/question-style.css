@@ -1,0 +1,98 @@
+div#time {
+    margin: 0;
+    padding: 2%;
+    background-color: #5C6BC0;
+    color: white;
+}
+
+span#timer-type, span#timer {
+    font-family: sans-serif;
+    font-size: 1.25em;
+}
+
+span#timer {
+    font-weight: 900;
+}
+
+fieldset {
+    display: block;
+    border: 1px solid black;
+    margin: 2%;
+}
+
+fieldset.not-bordered {
+    border: none;
+}
+
+#question-section div.mcq-option {
+    display: inline;
+    margin: 3px 15px;
+}
+
+#question-section input[type=button] {
+    display: block;
+    margin: 15px 0;
+}
+
+fieldset.palette {
+    display: block;
+    margin: 10px;
+    padding: 10px;
+    column-count: 4;
+}
+
+fieldset.section {
+    display: inline
+}
+
+input.palette.button {
+    height: 30px;
+    width: 30px;
+    display: inline-block;
+}
+
+fieldset.section legend {
+    background-color: black;
+}
+
+.palette.button.visited.unanswered {
+    background-color: #B71C1C;
+    color: white;
+}
+
+.palette.button.visited.answered {
+    background-color: #2E7D32;
+    color: white;
+}
+
+.palette.button.marked {
+    border-radius: 50%;
+}
+
+input.control#submit {
+    background-color: #FF6D00;
+    border-color: #FF6D00;
+    color: white;
+}
+
+input.control#quit {
+    background-color: black;
+    border-color: black;
+    color: white;
+}
+
+table {
+    border-collapse: collapse;
+    border: 1px solid black;
+    margin: 2%;
+}
+
+table td, table th {
+    border: 1px solid black;
+    padding: 5px;
+}
+
+input:disabled {
+    background-color: #BDBDBD;
+    border-color: #BDBDBD;
+}

@@ -1,45 +1,29 @@
 {% extends "question.html" %}
 
+    {% block question %}
 
-{% block question %}
-<input type="radio"
-    name="question"
-    value="A"
-    onchange="store_value()"
-    onsubmit="store_value()"
-    id="A">
-<label for="A">A</label>
+        {% for choice in choices %}
 
-<input type="radio"
-    name="question"
-    value="B"
-    id="B"
-    onchange="store_value()"
-    onsubmit="store_value()">
-<label for="B">B</label>
+            {% set choice_option = choice['option'] %}
+            {% set choice_value = choice['value'] %}
 
-<input type="radio"
-    name="question"
-    value="C"
-    id="C"
-    onchange="store_value()"
-    onsubmit="store_value()">
-<label for="C">C</label>
+            <div class="mcq-option">
+                <input type="radio"
+                    name="question"
+                    id="{{ choice_option }}"
+                    value="{{ choice_option }}"
+                    onsubmit="mcq_store_value({{ question_number }})"
+                    onchange="mcq_store_value({{ question_number }})"
+                    {{
+                    choice_value
+                    }}>
+                <label for="{{ choice_option }}">{{ choice_option }}</label>
+            </div>
 
-<input type="radio"
-    name="question"
-    value="D"
-    id="D"
-    onchange="store_value()"
-    onsubmit="store_value()">
-<label for="D">D</label>
+        {% endfor %}
 
-<br>
-<br>
+        <input type="button"
+            value="Clear"
+            onclick="clear_mcq({{ question_number }})">
 
-<input type="button"
-    value="Clear"
-    onclick="clear_mcq()">
-
-</form>
-{% endblock %}
+    {% endblock %}
