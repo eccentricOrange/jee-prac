@@ -5,3 +5,4 @@ exp*
 .env
 data/*
 !data/schema.sql
+!data/preconfigured-exams.json

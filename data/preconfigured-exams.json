@@ -1,0 +1,404 @@
+{
+    "jee-mains": {
+        "name": "JEE Mains",
+        "duration": 180,
+        "sections": [
+            {
+                "number-of-questions": 20,
+                "options": [
+                    "1",
+                    "2",
+                    "3",
+                    "4"
+                ],
+                "correct-marks": 4,
+                "unattempted-marks": 0,
+                "wrong-marks": -1,
+                "name": "Physics MCQ",
+                "type": "mcq",
+                "section-number": 1,
+                "section-name": "physics-mcq"
+            },
+            {
+                "number-of-questions": 5,
+                "correct-marks": 4,
+                "unattempted-marks": 0,
+                "wrong-marks": 0,
+                "name": "Physics Numeric",
+                "type": "numeric",
+                "section-number": 2,
+                "section-name": "physics-numeric"
+            },
+            {
+                "number-of-questions": 20,
+                "options": [
+                    "1",
+                    "2",
+                    "3",
+                    "4"
+                ],
+                "correct-marks": 4,
+                "unattempted-marks": 0,
+                "wrong-marks": -1,
+                "name": "Chemistry MCQ",
+                "type": "mcq",
+                "section-number": 3,
+                "section-name": "chemistry-mcq"
+            },
+            {
+                "number-of-questions": 5,
+                "correct-marks": 4,
+                "unattempted-marks": 0,
+                "wrong-marks": 0,
+                "name": "Chemistry Numeric",
+                "type": "numeric",
+                "section-number": 4,
+                "section-name": "chemistry-numeric"
+            },
+            {
+                "number-of-questions": 20,
+                "options": [
+                    "1",
+                    "2",
+                    "3",
+                    "4"
+                ],
+                "correct-marks": 4,
+                "unattempted-marks": 0,
+                "wrong-marks": -1,
+                "name": "Mathematics MCQ",
+                "type": "mcq",
+                "section-number": 5,
+                "section-name": "mathematics-mcq"
+            },
+            {
+                "number-of-questions": 5,
+                "correct-marks": 4,
+                "unattempted-marks": 0,
+                "wrong-marks": 0,
+                "name": "Mathematics Numeric",
+                "type": "numeric",
+                "section-number": 6,
+                "section-name": "mathematics-numeric"
+            }
+        ]
+    },
+    "jee-mains-old": {
+        "name": "JEE Mains (Old Pattern)",
+        "duration": 180,
+        "sections": [
+            {
+                "number-of-questions": 30,
+                "options": [
+                    "1",
+                    "2",
+                    "3",
+                    "4"
+                ],
+                "correct-marks": 4,
+                "unattempted-marks": 0,
+                "wrong-marks": -1,
+                "name": "Physics MCQ",
+                "type": "mcq",
+                "section-number": 1,
+                "section-name": "physics-mcq"
+            },
+            {
+                "number-of-questions": 30,
+                "options": [
+                    "1",
+                    "2",
+                    "3",
+                    "4"
+                ],
+                "correct-marks": 4,
+                "unattempted-marks": 0,
+                "wrong-marks": -1,
+                "name": "Chemistry MCQ",
+                "type": "mcq",
+                "section-number": 2,
+                "section-name": "chemistry-mcq"
+            },
+            {
+                "number-of-questions": 30,
+                "options": [
+                    "1",
+                    "2",
+                    "3",
+                    "4"
+                ],
+                "correct-marks": 4,
+                "unattempted-marks": 0,
+                "wrong-marks": -1,
+                "name": "Mathematics MCQ",
+                "type": "mcq",
+                "section-number": 3,
+                "section-name": "mathematics-mcq"
+            }
+        ]
+    },
+    "bitsat": {
+        "name": "BITSAT",
+        "duration": 180,
+        "sections": [
+            {
+                "number-of-questions": 30,
+                "options": [
+                    "a",
+                    "b",
+                    "c",
+                    "d"
+                ],
+                "correct-marks": 3,
+                "unattempted-marks": 0,
+                "wrong-marks": -1,
+                "name": "Physics MCQ",
+                "type": "mcq",
+                "section-number": 1,
+                "section-name": "physics-mcq"
+            },
+            {
+                "number-of-questions": 30,
+                "options": [
+                    "a",
+                    "b",
+                    "c",
+                    "d"
+                ],
+                "correct-marks": 3,
+                "unattempted-marks": 0,
+                "wrong-marks": -1,
+                "name": "Chemistry MCQ",
+                "type": "mcq",
+                "section-number": 2,
+                "section-name": "chemistry-mcq"
+            },
+            {
+                "number-of-questions": 10,
+                "options": [
+                    "a",
+                    "b",
+                    "c",
+                    "d"
+                ],
+                "correct-marks": 3,
+                "unattempted-marks": 0,
+                "wrong-marks": -1,
+                "name": "English Proficiency MCQ",
+                "type": "mcq",
+                "section-number": 3,
+                "section-name": "english-proficiency-mcq"
+            },
+            {
+                "number-of-questions": 20,
+                "options": [
+                    "a",
+                    "b",
+                    "c",
+                    "d"
+                ],
+                "correct-marks": 3,
+                "unattempted-marks": 0,
+                "wrong-marks": -1,
+                "name": "Logical Reasoning MCQ",
+                "type": "mcq",
+                "section-number": 4,
+                "section-name": "logical-reasoning-mcq"
+            },
+            {
+                "number-of-questions": 40,
+                "options": [
+                    "a",
+                    "b",
+                    "c",
+                    "d"
+                ],
+                "correct-marks": 3,
+                "unattempted-marks": 0,
+                "wrong-marks": -1,
+                "name": "Mathematics MCQ",
+                "type": "mcq",
+                "section-number": 5,
+                "section-name": "mathematics-mcq"
+            }
+        ]
+    },
+    "kcet": {
+        "name": "KCET",
+        "duration": 270,
+        "sections": [
+            {
+                "number-of-questions": 60,
+                "options": [
+                    "A",
+                    "B",
+                    "C",
+                    "D"
+                ],
+                "correct-marks": 1,
+                "unattempted-marks": 0,
+                "wrong-marks": 0,
+                "name": "Physics MCQ",
+                "type": "mcq",
+                "section-number": 1,
+                "section-name": "physics-mcq"
+            },
+            {
+                "number-of-questions": 60,
+                "options": [
+                    "A",
+                    "B",
+                    "C",
+                    "D"
+                ],
+                "correct-marks": 1,
+                "unattempted-marks": 0,
+                "wrong-marks": 0,
+                "name": "Chemistry MCQ",
+                "type": "mcq",
+                "section-number": 2,
+                "section-name": "chemistry-mcq"
+            },
+            {
+                "number-of-questions": 60,
+                "options": [
+                    "A",
+                    "B",
+                    "C",
+                    "D"
+                ],
+                "correct-marks": 1,
+                "unattempted-marks": 0,
+                "wrong-marks": 0,
+                "name": "Mathematics MCQ",
+                "type": "mcq",
+                "section-number": 3,
+                "section-name": "mathematics-mcq"
+            }
+        ]
+    },
+    "viteee": {
+        "name": "VITEEE",
+        "duration": 90,
+        "sections": [
+            {
+                "number-of-questions": 25,
+                "options": [
+                    "A",
+                    "B",
+                    "C",
+                    "D"
+                ],
+                "correct-marks": 1,
+                "unattempted-marks": 0,
+                "wrong-marks": 0,
+                "name": "Physics MCQ",
+                "type": "mcq",
+                "section-number": 1,
+                "section-name": "physics-mcq"
+            },
+            {
+                "number-of-questions": 25,
+                "options": [
+                    "A",
+                    "B",
+                    "C",
+                    "D"
+                ],
+                "correct-marks": 1,
+                "unattempted-marks": 0,
+                "wrong-marks": 0,
+                "name": "Chemistry MCQ",
+                "type": "mcq",
+                "section-number": 2,
+                "section-name": "chemistry-mcq"
+            },
+            {
+                "number-of-questions": 25,
+                "options": [
+                    "A",
+                    "B",
+                    "C",
+                    "D"
+                ],
+                "correct-marks": 1,
+                "unattempted-marks": 0,
+                "wrong-marks": 0,
+                "name": "Mathematics MCQ",
+                "type": "mcq",
+                "section-number": 3,
+                "section-name": "mathematics-mcq"
+            },
+            {
+                "number-of-questions": 3,
+                "options": [
+                    "A",
+                    "B",
+                    "C",
+                    "D"
+                ],
+                "correct-marks": 1,
+                "unattempted-marks": 0,
+                "wrong-marks": 0,
+                "name": "Aptitude MCQ",
+                "type": "mcq",
+                "section-number": 4,
+                "section-name": "aptitude-mcq"
+            },
+            {
+                "number-of-questions": 2,
+                "options": [
+                    "A",
+                    "B",
+                    "C",
+                    "D"
+                ],
+                "correct-marks": 1,
+                "unattempted-marks": 0,
+                "wrong-marks": 0,
+                "name": "English MCQ",
+                "type": "mcq",
+                "section-number": 5,
+                "section-name": "english-mcq"
+            }
+        ]
+    },
+    "ugee": {
+        "name": "IIIT-H UGEE",
+        "duration": 180,
+        "sections": [
+            {
+                "number-of-questions": 50,
+                "options": [
+                    "A",
+                    "B",
+                    "C",
+                    "D"
+                ],
+                "correct-marks": 1,
+                "unattempted-marks": 0,
+                "wrong-marks": 0,
+                "name": "SUPR MCQ",
+                "type": "mcq",
+                "section-number": 1,
+                "section-name": "supr-mcq"
+            },
+            {
+                "number-of-questions": 50,
+                "options": [
+                    "A",
+                    "B",
+                    "C",
+                    "D"
+                ],
+                "correct-marks": 2,
+                "unattempted-marks": 0,
+                "wrong-marks": -0.5,
+                "name": "REAP MCQ",
+                "type": "mcq",
+                "section-number": 2,
+                "section-name": "reap-mcq"
+            }
+        ]
+    }
+}
