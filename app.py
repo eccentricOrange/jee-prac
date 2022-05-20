@@ -184,7 +184,7 @@ def receive_test_type():
 def receive_test_config():
     global chosen_test_data, test_in_progress, test_selected, test_configured
 
-    if test_selected and not (test_in_progress or test_configured):
+    if not (test_in_progress or test_configured):
         if request.method == 'POST':
             form_data = request.form
             chosen_test_data['sections'] = []
