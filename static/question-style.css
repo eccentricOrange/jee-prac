@@ -46,8 +46,8 @@ fieldset.section {
 }
 
 input.palette.button {
-    height: 30px;
-    width: 30px;
+    height: 40px;
+    width: 40px;
     display: inline-block;
     margin: 2px 0;
 }
