@@ -20,11 +20,10 @@
 {% block body %}
 
 <body onload="init()">
-    <div id="title-and-time">
-        <h1>
-            {{ test }}: Question {{ question_number }}
-        </h1>
-
+    <h1>
+        {{ test }}: Question {{ question_number }}
+    </h1>
+    <div id="time">
         <span id="timer-type">
             {{ timer_type }}
         </span>
@@ -94,13 +93,17 @@
             class="control"
             id="previous"
             onclick="go_to_previous_question({{ question_number }})"
-            {{ previous_question_disabled }}>
+            {{
+            previous_question_disabled
+            }}>
         <input type="button"
             value="Next"
             class="control"
             id="next"
             onclick="go_to_next_question({{ question_number }})"
-            {{ next_question_disabled }}>
+            {{
+            next_question_disabled
+            }}>
         <input type="button"
             value="{{ mark_button_text }}"
             class="control"

@@ -1,8 +1,5 @@
 var section_count = 1;
 
-const field_container = document.createElement("div")
-field_container.className = "section-field-config-test"
-
 function get_new_section(section_number) {
     // create section within form
     var host_section = document.createElement("fieldset");
@@ -12,8 +9,6 @@ function get_new_section(section_number) {
     section_heading.innerHTML = `Section ${section_number}`;
 
     // input for section name
-    var name_div = field_container.cloneNode(true);
-
     var name_label = document.createElement("label");
     name_label.innerHTML = "Section Name";
     name_label.setAttribute("for", `section-${section_number}-name`);
@@ -24,12 +19,7 @@ function get_new_section(section_number) {
     name_input.setAttribute("id", `section-${section_number}-name`);
     name_input.setAttribute("required", "");
 
-    name_div.appendChild(name_label);
-    name_div.appendChild(name_input);
-
     // input for questions type
-    var questions_type_div = field_container.cloneNode(true);
-    
     var questions_type_label = document.createElement("label");
     questions_type_label.innerHTML = "Questions Type";
     questions_type_label.setAttribute("for", `section-${section_number}-questions-type`);
@@ -50,12 +40,7 @@ function get_new_section(section_number) {
     questions_type_select.appendChild(mcq_questions_option);
     questions_type_select.appendChild(numeric_questions_option);
 
-    questions_type_div.appendChild(questions_type_label);
-    questions_type_div.appendChild(questions_type_select);
-
     // input for questions count
-    var number_of_questions_div = field_container.cloneNode(true);
-    
     var number_of_questions_label = document.createElement("label");
     number_of_questions_label.innerHTML = "Number of Questions";
     number_of_questions_label.setAttribute("for", `section-${section_number}-number-of-questions`);
@@ -66,12 +51,7 @@ function get_new_section(section_number) {
     number_of_questions_input.setAttribute("id", `section-${section_number}-number-of-questions`);
     number_of_questions_input.setAttribute("required", "");
 
-    number_of_questions_div.appendChild(number_of_questions_label);
-    number_of_questions_div.appendChild(number_of_questions_input);
-
     // input for marks if correct
-    var marks_if_correct_div = field_container.cloneNode(true);
-
     var marks_if_correct_label = document.createElement("label");
     marks_if_correct_label.innerHTML = "Marks if correct";
     marks_if_correct_label.setAttribute("for", `section-${section_number}-marks-if-correct`);
@@ -82,12 +62,7 @@ function get_new_section(section_number) {
     marks_if_correct_input.setAttribute("id", `section-${section_number}-marks-if-correct`);
     marks_if_correct_input.setAttribute("required", "");
 
-    marks_if_correct_div.appendChild(marks_if_correct_label);
-    marks_if_correct_div.appendChild(marks_if_correct_input);
-
     // input for marks if unattempted
-    var marks_if_unattempted_div = field_container.cloneNode(true);
-
     var marks_if_unattempted_label = document.createElement("label");
     marks_if_unattempted_label.innerHTML = "Marks if unattempted";
     marks_if_unattempted_label.setAttribute("for", `section-${section_number}-marks-if-unattempted`);
@@ -98,12 +73,7 @@ function get_new_section(section_number) {
     marks_if_unattempted_input.setAttribute("id", `section-${section_number}-marks-if-unattempted`);
     marks_if_unattempted_input.setAttribute("required", "");
 
-    marks_if_unattempted_div.appendChild(marks_if_unattempted_label);
-    marks_if_unattempted_div.appendChild(marks_if_unattempted_input);
-
     // input for marks if wrong
-    var marks_if_wrong_div = field_container.cloneNode(true);
-
     var marks_if_wrong_label = document.createElement("label");
     marks_if_wrong_label.innerHTML = "Marks if wrong";
     marks_if_wrong_label.setAttribute("for", `section-${section_number}-marks-if-wrong`);
@@ -114,9 +84,6 @@ function get_new_section(section_number) {
     marks_if_wrong_input.setAttribute("id", `section-${section_number}-marks-if-wrong`);
     marks_if_wrong_input.setAttribute("required", "");
 
-    marks_if_wrong_div.appendChild(marks_if_wrong_label);
-    marks_if_wrong_div.appendChild(marks_if_wrong_input);
-
     // button to delete section
     var delete_section_button = document.createElement("input");
     delete_section_button.setAttribute("type", "button");
@@ -126,13 +93,18 @@ function get_new_section(section_number) {
 
     // append all inputs to section
     host_section.appendChild(section_heading);
-    host_section.appendChild(name_div);
-    host_section.appendChild(questions_type_div);
-    host_section.appendChild(number_of_questions_div);
-    host_section.appendChild(number_of_questions_div);
-    host_section.appendChild(marks_if_correct_div);
-    host_section.appendChild(marks_if_unattempted_div);
-    host_section.appendChild(marks_if_wrong_div);
+    host_section.appendChild(name_label);
+    host_section.appendChild(name_input);
+    host_section.appendChild(questions_type_label);
+    host_section.appendChild(questions_type_select);
+    host_section.appendChild(number_of_questions_label);
+    host_section.appendChild(number_of_questions_input);
+    host_section.appendChild(marks_if_correct_label);
+    host_section.appendChild(marks_if_correct_input);
+    host_section.appendChild(marks_if_unattempted_label);
+    host_section.appendChild(marks_if_unattempted_input);
+    host_section.appendChild(marks_if_wrong_label);
+    host_section.appendChild(marks_if_wrong_input);
     host_section.appendChild(delete_section_button);
 
     return host_section

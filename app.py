@@ -60,7 +60,7 @@ def back_up_recovery_data():
         dump(backup_data, backup_file)
 
 def restore_recovery_data():
-    global chosen_test_data, question_section_mapping, counts, outage_time, start_time
+    global chosen_test_data, question_section_mapping, counts, outage_time, start_time, test_in_progress, test_selected, test_configured
 
     if BACKUP_FILE_PATH.exists():
         with open(BACKUP_FILE_PATH, 'r') as backup_file:
@@ -71,6 +71,9 @@ def restore_recovery_data():
             counts = backup_data['counts']
             outage_time = datetime.fromisoformat(backup_data['outage-time']) + (datetime.now() - datetime.fromisoformat(backup_data['last-known-time']))
             start_time = datetime.fromisoformat(backup_data['last-known-time'])
+            test_in_progress = True
+            test_selected = True
+            test_configured = True
 
         return True
 
@@ -331,11 +334,9 @@ def mark():
                 section = chosen_test_data['sections'][section_number]
 
                 for question in section['questions']:
-                    print(dumps(question, indent=4))
                     if int(question['question-number']) == int(question_number):
                         question['marked'] = 'marked'
                         counts['marked'] += 1
-                        print('marked')
                         back_up_recovery_data()
                         return "", HTTPStatus.OK
 
@@ -411,7 +412,7 @@ def receive_value():
 
 @app.route('/jee/quit', methods=['GET'])
 def quit():
-    global chosen_test_data, question_section_mapping, counts, backup_data, test_in_progress, test_configured, test_started
+    global chosen_test_data, question_section_mapping, counts, backup_data, test_in_progress, test_configured, test_selected
 
     if test_in_progress:
 
@@ -426,7 +427,7 @@ def quit():
         }
         test_in_progress = False
         test_configured = False
-        test_started = False
+        test_selected = False
 
         BACKUP_FILE_PATH.unlink(missing_ok=True)
 
@@ -437,7 +438,7 @@ def quit():
 
 @app.route('/jee/submit', methods=['GET'])
 def submit():
-    global chosen_test_data, question_section_mapping, counts, backup_data, start_time, outage_time, test_in_progress, test_configured, test_started
+    global chosen_test_data, question_section_mapping, counts, backup_data, start_time, outage_time, test_in_progress, test_configured, test_selected
 
     if test_in_progress:
         END_TIME = datetime.now()
@@ -487,7 +488,7 @@ def submit():
         }
         test_in_progress = False
         test_configured = False
-        test_started = False
+        test_selected = False
 
         BACKUP_FILE_PATH.unlink(missing_ok=True)
         return redirect('/jee/submitted'), HTTPStatus.TEMPORARY_REDIRECT
