@@ -530,7 +530,7 @@ def download_questions():
 def main():
     create_file_system()
     restore_recovery_data()
-    app.run()
+    app.run(port=80, host='0.0.0.0')
 
 if __name__ == '__main__':
     main()
