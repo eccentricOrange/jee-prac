@@ -5,15 +5,18 @@ from http import HTTPStatus
 from json import dump, load, loads, dumps
 from re import match
 from os import environ
-from sqlite3 import connect
+from sqlite3 import connect, Row
+from csv import DictWriter
 
 app = Flask(__name__)
 
-TEMPLATE_TESTS_PATH = Path('preconfigured-exams.json')
+DEVELOPMENT_MODE = bool(environ.get("JEE_PRAC_DEVELOPMENT"))
+
 SCHEMA_PATH = Path('data') / 'schema.sql'
-USER_DIRECTORY = Path('data') if environ.get("JEE_PRAC_DEVELOPMENT") else Path().home() / '.jee-prac'
-BACKUP_FILE_PATH = USER_DIRECTORY / 'jee-prac-session-bkp.json'
-MAIN_DATABASE_PATH = USER_DIRECTORY / 'jee-prac-database.db'
+ACTIVE_DIRECTORY = Path('data') if DEVELOPMENT_MODE else Path().home() / '.jee-prac'
+BACKUP_FILE_PATH = ACTIVE_DIRECTORY / 'jee-prac-session-bkp.json'
+MAIN_DATABASE_PATH = ACTIVE_DIRECTORY / 'jee-prac-database.db'
+TEMPLATE_TESTS_PATH = ACTIVE_DIRECTORY / 'preconfigured-exams.json'
 
 chosen_test_data = {}
 backup_data = {}
@@ -26,13 +29,17 @@ counts = {
 }
 
 def create_file_system():
-    USER_DIRECTORY.mkdir(parents=True, exist_ok=True)
+    ACTIVE_DIRECTORY.mkdir(parents=True, exist_ok=True)
     MAIN_DATABASE_PATH.touch(exist_ok=True)
 
     with open(SCHEMA_PATH, 'r') as schema_file, connect(MAIN_DATABASE_PATH) as connection:
         connection.executescript(schema_file.read())
 
     connection.close()
+
+    if not (DEVELOPMENT_MODE or TEMPLATE_TESTS_PATH.exists()):
+        TEMPLATE_TESTS_PATH.touch(exist_ok=True)
+        TEMPLATE_TESTS_PATH.write_text((Path('data') / 'preconfigured-exams.json').read_text())
 
 
 def back_up_recovery_data():
@@ -50,7 +57,7 @@ def back_up_recovery_data():
         dump(backup_data, backup_file)
 
 def restore_recovery_data():
-    global chosen_test_data, question_section_mapping, counts, outage_time
+    global chosen_test_data, question_section_mapping, counts, outage_time, start_time
 
     if BACKUP_FILE_PATH.exists():
         with open(BACKUP_FILE_PATH, 'r') as backup_file:
@@ -60,6 +67,7 @@ def restore_recovery_data():
             question_section_mapping = backup_data['question-section-mapping']
             counts = backup_data['counts']
             outage_time = datetime.fromisoformat(backup_data['outage-time']) + (datetime.now() - datetime.fromisoformat(backup_data['last-known-time']))
+            start_time = datetime.fromisoformat(backup_data['last-known-time'])
 
         return True
 
@@ -92,6 +100,20 @@ def make_questions():
     chosen_test_data['total-number-of-questions'] = question_number
     start_time = datetime.now()
     outage_time = datetime.fromtimestamp(0)
+
+def create_csv_from_db(table_name: str) -> Path:
+    csv_filepath = ACTIVE_DIRECTORY / f'{table_name}.csv'
+    csv_filepath.touch(exist_ok=True)
+
+    with connect(MAIN_DATABASE_PATH) as connection, open(csv_filepath, 'w') as csv_file:
+        connection.row_factory = Row
+        db_data = connection.execute(f'SELECT * FROM {table_name}').fetchall()
+        csv_writer = DictWriter(csv_file, fieldnames=db_data[0].keys())
+        csv_writer.writeheader()
+        csv_writer.writerows(map(dict, db_data))
+
+    return csv_filepath
+
 
 @app.route('/jee/', methods=['GET', 'POST'])
 def select_test_type():
@@ -299,13 +321,13 @@ def mark():
                 section = chosen_test_data['sections'][section_number]
 
                 for question in section['questions']:
-                    if question['question-number'] == question_number:
+                    print(dumps(question, indent=4))
+                    if int(question['question-number']) == int(question_number):
                         question['marked'] = 'marked'
-
                         counts['marked'] += 1
-                    
-                    back_up_recovery_data()
-                    return "", HTTPStatus.OK
+                        print('marked')
+                        back_up_recovery_data()
+                        return "", HTTPStatus.OK
 
             
         return '', HTTPStatus.INTERNAL_SERVER_ERROR
@@ -328,11 +350,10 @@ def unmark():
                 for question in section['questions']:
                     if question['question-number'] == question_number:
                         question['marked'] = 'unmarked'
-
                         counts['marked'] -= 1
 
-                    back_up_recovery_data()
-                    return "", HTTPStatus.OK
+                        back_up_recovery_data()
+                        return "", HTTPStatus.OK
 
             
         return '', HTTPStatus.INTERNAL_SERVER_ERROR
@@ -456,6 +477,33 @@ def submit():
 @app.route('/jee/submitted', methods=['GET'])
 def submitted():
     return render_template('submitted.html'), HTTPStatus.OK
+
+@app.route('/jee/download', methods=['GET'])
+def download():
+    return render_template('download.html'), HTTPStatus.OK
+
+@app.route('/jee/download/exams', methods=['GET'])
+def download_exams():
+    csv_path = create_csv_from_db('exams')
+    file = send_file(csv_path)
+    csv_path.unlink(missing_ok=True)
+    return file, HTTPStatus.OK
+
+
+@app.route('/jee/download/sections', methods=['GET'])
+def download_sections():
+    csv_path = create_csv_from_db('sections')
+    file = send_file(csv_path)
+    csv_path.unlink(missing_ok=True)
+    return file, HTTPStatus.OK
+
+
+@app.route('/jee/download/questions', methods=['GET'])
+def download_questions():
+    csv_path = create_csv_from_db('questions')
+    file = send_file(csv_path)
+    csv_path.unlink(missing_ok=True)
+    return file, HTTPStatus.OK
 
 
 def main():

@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+
+    {% block title %}
+        Download Results
+    {% endblock %}
+
+    {% block script %} {% endblock %}
+
+    {% block style %}
+        <link rel="stylesheet"
+            href="{{ url_for('static', filename='config-style.css') }}">
+    {% endblock %}
+
+    {% block body %}
+
+        <body>
+            <h1>Download your results</h1>
+
+            <input type="button"
+                value="Download exams CSV"
+                onclick="window.location.href='/jee/download/exams'">
+
+            <input type="button"
+                value="Download sections CSV"
+                onclick="window.location.href='/jee/download/sections'">
+
+            <input type="button"
+                value="Download questions CSV"
+                onclick="window.location.href='/jee/download/questions'">
+
+            <input type="button"
+                value="Go back to home page"
+                onclick="window.location.href='/jee/'">
+        </body>
+    
+    {% endblock %}
