@@ -27,6 +27,9 @@ counts = {
     'marked': 0,
     'unvisited': 0
 }
+test_in_progress = False
+test_selected = False
+test_configured = False
 
 def create_file_system():
     ACTIVE_DIRECTORY.mkdir(parents=True, exist_ok=True)
@@ -117,9 +120,9 @@ def create_csv_from_db(table_name: str) -> Path:
 
 @app.route('/jee/', methods=['GET', 'POST'])
 def select_test_type():
-    global chosen_test_data
-
-    if not chosen_test_data:
+    global test_in_progress
+    
+    if not test_in_progress:
         with open(TEMPLATE_TESTS_PATH, 'r') as template_tests_file:
             template_tests = load(template_tests_file)
 
@@ -129,18 +132,18 @@ def select_test_type():
 
 @app.route('/jee/configure-test/', methods=['GET', 'POST'])
 def configure_test():
-    global chosen_test_data
+    global test_in_progress, test_selected, test_configured
 
-    if not chosen_test_data:
+    if test_selected and not (test_in_progress or test_configured):
         return render_template('configure-test.html'), HTTPStatus.OK
 
     return "", HTTPStatus.IM_USED
 
 @app.route('/jee/receive-test-type', methods=['POST'])
 def receive_test_type():
-    global chosen_test_data
+    global chosen_test_data, test_in_progress, test_selected, test_configured
     
-    if not chosen_test_data:
+    if not (test_in_progress or test_selected or test_configured):
         if request.method == 'POST':
             form_data = request.form
 
@@ -160,10 +163,14 @@ def receive_test_type():
                             else:
                                 chosen_test_data['duration'] = 0
 
+                        test_selected = True
+                        test_configured = True
                         return redirect('/jee/start-test'), HTTPStatus.TEMPORARY_REDIRECT
 
                     return "", HTTPStatus.BAD_REQUEST
             
+            chosen_test_data['timing-type'] = form_data['timing-type']
+            chosen_test_data['duration'] = int(form_data['duration']) if form_data['timing-type'] == 'custom-time' else 0
             return render_template('configure-test.html'), HTTPStatus.OK
 
         return '', HTTPStatus.BAD_REQUEST
@@ -172,9 +179,9 @@ def receive_test_type():
 
 @app.route('/jee/receive-test-config', methods=['POST'])
 def receive_test_config():
-    global chosen_test_data
+    global chosen_test_data, test_in_progress, test_selected, test_configured
 
-    if not chosen_test_data:
+    if test_selected and not (test_in_progress or test_configured):
         if request.method == 'POST':
             form_data = request.form
             chosen_test_data['sections'] = []
@@ -207,6 +214,8 @@ def receive_test_config():
                     
                     section_index += 1
 
+            test_selected = True
+            test_configured = True
             return redirect('/jee/start-test'), HTTPStatus.TEMPORARY_REDIRECT
 
         return '', HTTPStatus.BAD_REQUEST
@@ -216,10 +225,11 @@ def receive_test_config():
 
 @app.route('/jee/start-test', methods=['GET', 'POST'])
 def start_test():
-    global chosen_test_data
+    global chosen_test_data, test_in_progress, test_selected, test_configured
 
-    if chosen_test_data:
+    if test_selected and test_configured:
         make_questions()
+        test_in_progress = True
         return redirect('/jee/question?question-number=1'), HTTPStatus.TEMPORARY_REDIRECT
 
     return '', HTTPStatus.NOT_IMPLEMENTED
@@ -227,9 +237,9 @@ def start_test():
 
 @app.route('/jee/question', methods=['GET', 'POST'])
 def get_question():
-    global chosen_test_data, question_section_mapping, counts, start_time, outage_time
+    global chosen_test_data, question_section_mapping, counts, start_time, outage_time, test_in_progress
 
-    if chosen_test_data and chosen_test_data['sections'] and question_section_mapping:
+    if test_in_progress:
 
         question_number = int(request.args.get('question-number'))  # type: ignore
 
@@ -310,9 +320,9 @@ def get_question():
 
 @app.route('/jee/mark', methods=['POST'])
 def mark():
-    global chosen_test_data, question_section_mapping, counts
+    global chosen_test_data, question_section_mapping, counts, test_in_progress
 
-    if chosen_test_data and chosen_test_data['sections'] and question_section_mapping:
+    if test_in_progress:
         form_data = dict(request.get_json(force=True))
         question_number = int(form_data['question-number'])
 
@@ -337,9 +347,9 @@ def mark():
 
 @app.route('/jee/unmark', methods=['POST'])
 def unmark():
-    global chosen_test_data, question_section_mapping, counts
+    global chosen_test_data, question_section_mapping, counts, test_in_progress
 
-    if chosen_test_data and chosen_test_data['sections'] and question_section_mapping:
+    if test_in_progress:
         form_data = dict(request.get_json(force=True))
         question_number = int(form_data['question-number'])
 
@@ -363,9 +373,9 @@ def unmark():
 
 @app.route('/jee/receive-value', methods=['POST'])
 def receive_value():
-    global chosen_test_data, question_section_mapping, counts
+    global chosen_test_data, question_section_mapping, counts, test_in_progress
 
-    if chosen_test_data and chosen_test_data['sections'] and question_section_mapping:
+    if test_in_progress:
         form_data = dict(request.get_json(force=True))
         question_number = int(form_data['question-number'])
         value = form_data['value']
@@ -401,30 +411,37 @@ def receive_value():
 
 @app.route('/jee/quit', methods=['GET'])
 def quit():
-    global chosen_test_data, question_section_mapping, counts, backup_data
+    global chosen_test_data, question_section_mapping, counts, backup_data, test_in_progress, test_configured, test_started
 
-    chosen_test_data = {}
-    backup_data = {}
-    question_section_mapping = []
-    counts = {
-        'answered': 0,
-        'unanswered': 0,
-        'marked': 0,
-        'unvisited': 0
-    }
+    if test_in_progress:
 
-    BACKUP_FILE_PATH.unlink(missing_ok=True)
+        chosen_test_data = {}
+        backup_data = {}
+        question_section_mapping = []
+        counts = {
+            'answered': 0,
+            'unanswered': 0,
+            'marked': 0,
+            'unvisited': 0
+        }
+        test_in_progress = False
+        test_configured = False
+        test_started = False
 
-    return redirect('/jee/'), HTTPStatus.TEMPORARY_REDIRECT
+        BACKUP_FILE_PATH.unlink(missing_ok=True)
+
+        return redirect('/jee/'), HTTPStatus.TEMPORARY_REDIRECT
+
+    return '', HTTPStatus.NOT_IMPLEMENTED
 
 
 @app.route('/jee/submit', methods=['GET'])
 def submit():
-    global chosen_test_data, question_section_mapping, counts, backup_data, start_time, outage_time
-    END_TIME = datetime.now()
+    global chosen_test_data, question_section_mapping, counts, backup_data, start_time, outage_time, test_in_progress, test_configured, test_started
 
-    if chosen_test_data and chosen_test_data['sections'] and question_section_mapping:
-        
+    if test_in_progress:
+        END_TIME = datetime.now()
+
         with connect(MAIN_DATABASE_PATH) as connection:
 
             exam_data = (
@@ -468,6 +485,9 @@ def submit():
             'marked': 0,
             'unvisited': 0
         }
+        test_in_progress = False
+        test_configured = False
+        test_started = False
 
         BACKUP_FILE_PATH.unlink(missing_ok=True)
         return redirect('/jee/submitted'), HTTPStatus.TEMPORARY_REDIRECT

@@ -24,7 +24,7 @@ Configure Test
     action="/jee/receive-test-config">
         <div id="sections">
             <div class="section-field-config-test">
-                Exam name
+                <label for="exam-name">Exam name</label>
                 <input type="text"
                     name="exam-name"
                     id="exam-name"
@@ -33,7 +33,7 @@ Configure Test
             <fieldset id="section-1">
                 <legend>Section 1</legend>
                 <div class="section-field-config-test">
-                    Section name
+                    <label for="section-1-name">Section name</label>
                     <input type="text"
                         name="section-1-name"
                         id="section-1-name"
@@ -41,7 +41,7 @@ Configure Test
                 </div>
 
                 <div class="section-field-config-test">
-                    Questions type
+                    <label for="section-1-questions-type">Questions type</label>
                     <select name="section-1-questions-type"
                         id="section-1-questions-type"
                         required>
@@ -51,7 +51,7 @@ Configure Test
                 </div>
 
                 <div class="section-field-config-test">
-                    Number of questions
+                    <label for="section-1-number-of-questions">Number of questions</label>
                     <input type="number"
                         name="section-1-number-of-questions"
                         id="section-1-number-of-questions"
@@ -59,25 +59,25 @@ Configure Test
                 </div>
 
                 <div class="section-field-config-test">
-                    Marks if correct
+                    <label for="section-1-number-of-questions">Marks if correct</label>
                     <input type="number"
-                        name="section-1-marks-if-correct"
+                        name="section-1-number-of-questions"
                         id="section-1-marks-if-correct"
                         required>
                 </div>
 
                 <div class="section-field-config-test">
-                    Marks if unattempted
+                    <label for="section-1-number-of-questions">Marks if unattempted</label>
                     <input type="number"
-                        name="section-1-marks-if-unattempted"
+                        name="section-1-number-of-questions"
                         id="section-1-marks-if-unattempted"
                         required>
                 </div>
 
                 <div class="section-field-config-test">
-                    Marks if wrong
+                    <label for="section-1-number-of-questions">Marks if wrong</label>
                     <input type="number"
-                        name="section-1-marks-if-wrong"
+                        name="section-1-number-of-questions"
                         id="section-1-marks-if-wrong"
                         required>
                 </div>
@@ -95,7 +95,8 @@ Configure Test
             onclick="reset_form()">
         <input type="button"
             value="Back to test types"
-            id="back-to-test-types">
+            id="back-to-test-types"
+            onclick="window.location.href='/jee/'">
 
         <input type="submit"
             value="Start test"

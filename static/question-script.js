@@ -128,3 +128,9 @@ function clock() {
         window.location.href = '/jee/submit';
     }
 }
+
+function finish_test(method) {
+    if (window.confirm(`Are you sure you want to ${method} the test?`)){
+        window.location.href=`/jee/${method}`;
+    }
+}
