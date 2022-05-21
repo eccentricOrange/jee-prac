@@ -32,13 +32,11 @@ Configure Test
                 id="test-type"
                 required
                 onchange="update_duration_on_test_change()">
-                
                     {% for test_type in test_types %}
                         <option value="{{ test_type['id'] }}">
                             {{ test_type['name'] }}
                         </option>
                     {% endfor %}
-                
                 <option value="custom">[Custom]</option>
             </select>
         </fieldset>

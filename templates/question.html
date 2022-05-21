@@ -35,46 +35,35 @@
         <legend>
             {{ question_type }} Question
         </legend>
-
         {% block question %} {% endblock %}
     </fieldset>
 
     <fieldset class="not-bordered palette">
         {% for section in sections %}
-
         <fieldset class="not-bordered palette section">
             <legend>
                 {{ section['name'] }}
             </legend>
-
             {% for question in section['questions'] %}
-
                 {% set number = question['question-number'] %}
                 {% set marked = question['marked'] %}
                 {% set visited = question['visited'] %}
                 {% set answered = question['answered'] %}
-
                 {% if number == question_number %}
-                    
                     <input type="button"
                         value="{{ number }}"
                         id="question-{{ number }}"
                         class="palette button {{ marked }} {{ visited }} {{ answered }} current"
                         onclick="go_to_question({{ number }})">
-
                 {% else %}
-
                     <input type="button"
                         value="{{ number }}"
                         id="question-{{ number }}"
                         class="palette button {{ marked }} {{ visited }} {{ answered }}"
                         onclick="go_to_question({{ number }})">
-            
                 {% endif %}
-
             {% endfor %}
         </fieldset>
-
         {% endfor %}
     </fieldset>
 

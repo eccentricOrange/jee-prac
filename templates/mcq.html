@@ -1,12 +1,9 @@
 {% extends "question.html" %}
 
     {% block question %}
-
         {% for choice in choices %}
-
             {% set choice_option = choice['option'] %}
             {% set choice_value = choice['value'] %}
-
             <div class="mcq-option">
                 <input type="radio"
                     name="question"
@@ -19,11 +16,8 @@
                     }}>
                 <label for="{{ choice_option }}">{{ choice_option }}</label>
             </div>
-
         {% endfor %}
-
         <input type="button"
             value="Clear"
             onclick="clear_mcq({{ question_number }})">
-
     {% endblock %}
