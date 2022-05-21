@@ -129,7 +129,19 @@ def select_test_type():
         with open(TEMPLATE_TESTS_PATH, 'r') as template_tests_file:
             template_tests = load(template_tests_file)
 
-        return render_template('select-test-type.html', template_tests=template_tests), HTTPStatus.OK
+            test_types = [
+                {
+                    'name': test_data['name'],
+                    'id': test_id
+                }
+                for test_id, test_data in template_tests.items()
+            ]
+
+        return render_template(
+            'select-test-type.html',
+            template_tests=template_tests,
+            test_types=test_types
+        ), HTTPStatus.OK
 
     return "", HTTPStatus.IM_USED
 
