@@ -32,14 +32,13 @@ Configure Test
                 id="test-type"
                 required
                 onchange="update_duration_on_test_change()">
-                <option value="jee-mains">JEE Mains</option>
-                <option value="jee-mains-old">JEE Mains (Old Pattern)</option>
-                <option value="jee-adv"
-                    disabled>JEE Advanced</option>
-                <option value="bitsat">BITSAT</option>
-                <option value="kcet">KCET</option>
-                <option value="viteee">VITEEE</option>
-                <option value="ugee">IIIT-H UGEE</option>
+                
+                    {% for test_type in test_types %}
+                        <option value="{{ test_type['id'] }}">
+                            {{ test_type['name'] }}
+                        </option>
+                    {% endfor %}
+                
                 <option value="custom">[Custom]</option>
             </select>
         </fieldset>

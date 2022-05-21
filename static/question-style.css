@@ -1,3 +1,7 @@
+div#time, table#statistics {
+    user-select: none;
+}
+
 div#time {
     margin: 0;
     padding: 2%;
@@ -46,13 +50,17 @@ fieldset.section {
 }
 
 input.palette.button {
-    height: 30px;
-    width: 30px;
+    height: 40px;
+    width: 40px;
     display: inline-block;
+    margin: 2px 0;
 }
 
 fieldset.section legend {
     background-color: black;
+}
+.palette.button.current {
+    border-width: 3px;
 }
 
 .palette.button.visited.unanswered {
@@ -60,9 +68,17 @@ fieldset.section legend {
     color: white;
 }
 
+.palette.button.visited.unanswered.current {
+    background-color: #D32F2F;
+}
+
 .palette.button.visited.answered {
     background-color: #2E7D32;
     color: white;
+}
+
+.palette.button.visited.answered.current {
+    background-color: #43A047;
 }
 
 .palette.button.marked {
@@ -84,7 +100,8 @@ input.control#quit {
 table {
     border-collapse: collapse;
     border: 1px solid black;
-    margin: 2%;
+    margin: 10px 40px;
+    font-family: sans-serif;
 }
 
 table td, table th {

@@ -129,7 +129,19 @@ def select_test_type():
         with open(TEMPLATE_TESTS_PATH, 'r') as template_tests_file:
             template_tests = load(template_tests_file)
 
-        return render_template('select-test-type.html', template_tests=template_tests), HTTPStatus.OK
+            test_types = [
+                {
+                    'name': test_data['name'],
+                    'id': test_id
+                }
+                for test_id, test_data in template_tests.items()
+            ]
+
+        return render_template(
+            'select-test-type.html',
+            template_tests=template_tests,
+            test_types=test_types
+        ), HTTPStatus.OK
 
     return "", HTTPStatus.IM_USED
 
@@ -184,7 +196,7 @@ def receive_test_type():
 def receive_test_config():
     global chosen_test_data, test_in_progress, test_selected, test_configured
 
-    if test_selected and not (test_in_progress or test_configured):
+    if not (test_in_progress or test_configured):
         if request.method == 'POST':
             form_data = request.form
             chosen_test_data['sections'] = []
@@ -266,7 +278,7 @@ def get_question():
                         if chosen_test_data['timing-type'] != 'untimed':
                             time_remaining = datetime.fromtimestamp(chosen_test_data['duration'] * 60) - ((datetime.now() - start_time) + outage_time)
                             time_remaining_string = datetime.fromtimestamp(time_remaining.total_seconds()).isoformat()
-                            timer_type = "Time Remaining"
+                            timer_type = "Time Remaining:"
                         
                         else:
                             timer_type = "Untimed Test"
