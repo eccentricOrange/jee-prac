@@ -266,7 +266,7 @@ def get_question():
                         if chosen_test_data['timing-type'] != 'untimed':
                             time_remaining = datetime.fromtimestamp(chosen_test_data['duration'] * 60) - ((datetime.now() - start_time) + outage_time)
                             time_remaining_string = datetime.fromtimestamp(time_remaining.total_seconds()).isoformat()
-                            timer_type = "Time Remaining"
+                            timer_type = "Time Remaining:"
                         
                         else:
                             timer_type = "Untimed Test"

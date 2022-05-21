@@ -65,6 +65,18 @@ input[type=reset] {
     padding: 5px;
 }
 
+input[type=button]:enabled:hover,
+input[type=submit]:enabled:hover,
+input[type=reset]:enabled:hover {
+    filter: brightness(90%);
+}
+
+input[type=button]:enabled:active,
+input[type=submit]:enabled:active,
+input[type=reset]:enabled:active {
+    filter: brightness(80%);
+} 
+
 input[type=submit] {
     background-color: #FF6D00;
     border-color: #FF6D00;
