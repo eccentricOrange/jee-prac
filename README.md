@@ -30,7 +30,7 @@ As an example, here is what that means for the JEE Mains according to the patter
 
 ## Installation
 1.  Clone the repository
-2.  You must have a recent Python (3.10 or newer).
+2.  You must have a recent Python (3.10 or newer) and a recent SQLite (3.35 or newer).
 3.  Install the PyPi dependencies.
 
     ```sh
