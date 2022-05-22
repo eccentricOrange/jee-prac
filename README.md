@@ -51,13 +51,13 @@ As an example, here is what that means for the JEE Mains according to the patter
 
     If you're running in a server, note that you might have to allow Python network access. Also note that, it might be a good idea to create a service in this case.
 
-3.  A URI should be printed to the standard output. Copy and paste it into a web browser, and visit it.
+3.  A URI ending in `/jee` should be printed to the standard output. Copy and paste it into a web browser, and visit it.
 
 4.  Proceed to setup and take the test from the GUI.
 
 5.  Once your done with your test (or at any point when no exam is taking place but the script is running), you may append `/download` to the URI from step 3, and download your data as CSV files. It will always contain all the exams submitted so far.
 
 ## Test configuration
-The first time you run this, it would create a folder `.jee-prac` in your home directory (on most Linux, MacOS, and PowerShell terminals, this is `~/.jee-prac`). This directory also has a JSON file called `preconfigured-exams.json`, which has data for some of the tests taken in India. You can modify this file with additional test patterns that would then appear in the GUI.
+The first time you run this, it would create a folder `.jee-prac` in your home directory (on most Linux, MacOS, and PowerShell terminals, this is `~/.jee-prac`). Aside from the main database that records your respoonses, this directory also has a JSON file called `preconfigured-exams.json`, which has the test patterns for some of the tests taken in India. You can modify this file with additional test patterns that would then appear in the GUI.
 
 If you feel that you have added something significant, please feel free to submit a pull request with the modification applied to `data/preconfigured-exams.json`.
