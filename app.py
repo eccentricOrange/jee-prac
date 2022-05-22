@@ -11,6 +11,7 @@ from csv import DictWriter
 app = Flask(__name__)
 
 DEVELOPMENT_MODE = bool(environ.get("JEE_PRAC_DEVELOPMENT"))
+SERVER_MODE = bool(environ.get("JEE_PRAC_SERVER"))
 
 SCHEMA_PATH = Path('data') / 'schema.sql'
 ACTIVE_DIRECTORY = Path('data') if DEVELOPMENT_MODE else Path().home() / '.jee-prac'
@@ -540,9 +541,17 @@ def download_questions():
 
 
 def main():
+    global SERVER_MODE
+
     create_file_system()
     restore_recovery_data()
-    app.run(port=80, host='0.0.0.0')
+
+    host = '0.0.0.0' if SERVER_MODE else '127.0.0.1'
+    port = 80 if SERVER_MODE else 5000
+
+    print(f'Visit http://{host}:{port}/jee to begin.\n')
+
+    app.run(host=host, port=port)
 
 if __name__ == '__main__':
     main()
