@@ -264,71 +264,71 @@ def get_question():
             if lower <= question_number <= upper:
                 section = chosen_test_data['sections'][section_number]
 
-                for question in section['questions']:
-                    if question['question-number'] == question_number:
-                        value = question['value']
+                question = section['questions'][question_number - lower]
+    
+                value = question['value']
 
-                        next_question_disabled = "disabled" if chosen_test_data['total-number-of-questions'] == question_number else ""
-                        previous_question_disabled = "disabled" if question_number == 1 else ""
-                        mark_button_text = "Mark" if question['marked'] == "unmarked" else "Unmark"
+                next_question_disabled = "disabled" if chosen_test_data['total-number-of-questions'] == question_number else ""
+                previous_question_disabled = "disabled" if question_number == 1 else ""
+                mark_button_text = "Mark" if question['marked'] == "unmarked" else "Unmark"
 
-                        if question['visited'] == 'unvisited':
-                            question['visited'] = 'visited'
-                            counts['unvisited'] -= 1
+                if question['visited'] == 'unvisited':
+                    question['visited'] = 'visited'
+                    counts['unvisited'] -= 1
 
-                        if chosen_test_data['timing-type'] != 'untimed':
-                            time_remaining = datetime.fromtimestamp(chosen_test_data['duration'] * 60) - ((datetime.now() - start_time) + outage_time)
-                            time_remaining_string = datetime.fromtimestamp(time_remaining.total_seconds()).isoformat()
-                            timer_type = "Time Remaining:"
-                        
-                        else:
-                            timer_type = "Untimed Test"
-                            time_remaining_string = ""
+                if chosen_test_data['timing-type'] != 'untimed':
+                    time_remaining = datetime.fromtimestamp(chosen_test_data['duration'] * 60) - ((datetime.now() - start_time) + outage_time)
+                    time_remaining_string = datetime.fromtimestamp(time_remaining.total_seconds()).isoformat()
+                    timer_type = "Time Remaining:"
+                
+                else:
+                    timer_type = "Untimed Test"
+                    time_remaining_string = ""
 
-                        if section['type'] == 'mcq':
-                            choices = [
-                                {
-                                    'option': option,
-                                    'value': "checked" if option == value else ""
-                                }
-                                for option in section['options']
-                            ]
+                if section['type'] == 'mcq':
+                    choices = [
+                        {
+                            'option': option,
+                            'value': "checked" if option == value else ""
+                        }
+                        for option in section['options']
+                    ]
 
-                            back_up_recovery_data()
-                            return render_template(
-                                'mcq.html',
-                                sections=chosen_test_data['sections'],
-                                question_number=question_number,
-                                question_type=section['name'],
-                                test=chosen_test_data['name'],
-                                choices=choices,
-                                counts=counts,
-                                next_question_disabled=next_question_disabled,
-                                previous_question_disabled=previous_question_disabled,
-                                mark_button_text=mark_button_text,
-                                timer_type=timer_type,
-                                time_remaining_string=time_remaining_string
-                            ), HTTPStatus.OK
-                        
-                        elif section['type'] == 'numeric':
-                            back_up_recovery_data()
-                            return render_template(
-                                'numeric.html',
-                                sections=chosen_test_data['sections'],
-                                question_number=question_number,
-                                question_type=section['name'],
-                                test=chosen_test_data['name'],
-                                value=question['value'],
-                                counts=counts,
-                                next_question_disabled=next_question_disabled,
-                                previous_question_disabled=previous_question_disabled,
-                                mark_button_text=mark_button_text,
-                                timer_type=timer_type,
-                                time_remaining_string=time_remaining_string
-                            ), HTTPStatus.OK
+                    back_up_recovery_data()
+                    return render_template(
+                        'mcq.html',
+                        sections=chosen_test_data['sections'],
+                        question_number=question_number,
+                        question_type=section['name'],
+                        test=chosen_test_data['name'],
+                        choices=choices,
+                        counts=counts,
+                        next_question_disabled=next_question_disabled,
+                        previous_question_disabled=previous_question_disabled,
+                        mark_button_text=mark_button_text,
+                        timer_type=timer_type,
+                        time_remaining_string=time_remaining_string
+                    ), HTTPStatus.OK
+                
+                elif section['type'] == 'numeric':
+                    back_up_recovery_data()
+                    return render_template(
+                        'numeric.html',
+                        sections=chosen_test_data['sections'],
+                        question_number=question_number,
+                        question_type=section['name'],
+                        test=chosen_test_data['name'],
+                        value=question['value'],
+                        counts=counts,
+                        next_question_disabled=next_question_disabled,
+                        previous_question_disabled=previous_question_disabled,
+                        mark_button_text=mark_button_text,
+                        timer_type=timer_type,
+                        time_remaining_string=time_remaining_string
+                    ), HTTPStatus.OK
 
-                        else:
-                            return '', HTTPStatus.NOT_IMPLEMENTED
+                else:
+                    return '', HTTPStatus.NOT_IMPLEMENTED
 
         return '', HTTPStatus.NOT_IMPLEMENTED
 
@@ -346,12 +346,12 @@ def mark():
             if lower <= question_number <= upper:
                 section = chosen_test_data['sections'][section_number]
 
-                for question in section['questions']:
-                    if int(question['question-number']) == int(question_number):
-                        question['marked'] = 'marked'
-                        counts['marked'] += 1
-                        back_up_recovery_data()
-                        return "", HTTPStatus.OK
+                question = section['questions'][question_number - lower]
+            
+                question['marked'] = 'marked'
+                counts['marked'] += 1
+                back_up_recovery_data()
+                return "", HTTPStatus.OK
 
             
         return '', HTTPStatus.INTERNAL_SERVER_ERROR
@@ -367,17 +367,17 @@ def unmark():
         form_data = dict(request.get_json(force=True))
         question_number = int(form_data['question-number'])
 
+    
         for lower, upper, section_number in question_section_mapping:
             if lower <= question_number <= upper:
                 section = chosen_test_data['sections'][section_number]
 
-                for question in section['questions']:
-                    if question['question-number'] == question_number:
-                        question['marked'] = 'unmarked'
-                        counts['marked'] -= 1
+                question = section['questions'][question_number - lower]
+                question['marked'] = 'unmarked'
+                counts['marked'] -= 1
 
-                        back_up_recovery_data()
-                        return "", HTTPStatus.OK
+                back_up_recovery_data()
+                return "", HTTPStatus.OK
 
             
         return '', HTTPStatus.INTERNAL_SERVER_ERROR
@@ -398,24 +398,23 @@ def receive_value():
             if lower <= question_number <= upper:
                 section = chosen_test_data['sections'][section_number]
 
-                for question in section['questions']:
-                    if question['question-number'] == question_number:
-                        old_value = question['value']
+                question = section['questions'][question_number - lower]
+                old_value = question['value']
 
-                        if (not old_value) and value:
-                            counts['unanswered'] -= 1
-                            counts['answered'] += 1
-                            question['answered'] = 'answered'
+                if (not old_value) and value:
+                    counts['unanswered'] -= 1
+                    counts['answered'] += 1
+                    question['answered'] = 'answered'
 
-                        if old_value and not value:
-                            counts['answered'] -= 1
-                            counts['unanswered'] += 1
-                            question['answered'] = 'unanswered'
+                if old_value and not value:
+                    counts['answered'] -= 1
+                    counts['unanswered'] += 1
+                    question['answered'] = 'unanswered'
 
-                        question['value'] = value
+                question['value'] = value
 
-                        back_up_recovery_data()
-                        return "", HTTPStatus.OK
+                back_up_recovery_data()
+                return "", HTTPStatus.OK
 
             
         return '', HTTPStatus.INTERNAL_SERVER_ERROR
