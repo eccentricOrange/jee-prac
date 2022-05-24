@@ -69,7 +69,7 @@ fieldset.section legend {
 }
 
 .palette.button.visited.unanswered.current {
-    background-color: #D32F2F;
+    background-color: #F44336;
 }
 
 .palette.button.visited.answered {
@@ -78,7 +78,7 @@ fieldset.section legend {
 }
 
 .palette.button.visited.answered.current {
-    background-color: #43A047;
+    background-color: #4CAF50;
 }
 
 .palette.button.marked {
