@@ -12,11 +12,12 @@ function init() {
     form.querySelector("#duration").setAttribute("disabled", "disabled");
 }
 
-function update_duration_on_test_change() {
+function update_on_test_change() {
     const form = document.getElementById("select-test-type-form");
 
     if (form.querySelector("#test-type").value == "custom") {
         form.querySelector("#set-time").setAttribute("disabled", "disabled");
+        document.getElementById("submit-button").value = "Continue";
 
         if (form.querySelector("#timing-type").value == "set-time") {
             form.querySelector("#timing-type").value = "custom-time"
@@ -25,6 +26,8 @@ function update_duration_on_test_change() {
         }
     } else {
         form.querySelector("#set-time").removeAttribute("disabled");
+        document.getElementById("submit-button").value = "Start test";
+
     }
     
     if (form.querySelector("#timing-type").value == "set-time") {
@@ -37,7 +40,7 @@ function update_duration_on_test_change() {
 }
 
 function update_duration_on_timing_type_change() {
-    const form = update_duration_on_test_change()
+    const form = update_on_test_change()
     form.querySelector("#duration").setAttribute("disabled", "disabled");
 
     if (form.querySelector("#timing-type").value == "custom-time") {

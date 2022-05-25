@@ -31,7 +31,7 @@ Configure Test
             <select name="test-type"
                 id="test-type"
                 required
-                onchange="update_duration_on_test_change()">
+                onchange="update_on_test_change()">
                     {% for test_type in test_types %}
                         <option value="{{ test_type['id'] }}">
                             {{ test_type['name'] }}
@@ -68,9 +68,11 @@ Configure Test
 
         <input type="reset"
             value="Reset form"
+            id="reset-form"
             onclick="init()">
         <input type="submit"
-            value="Continue">
+            value="Start test"
+            id="submit-button">
     </form>
 </body>
 
