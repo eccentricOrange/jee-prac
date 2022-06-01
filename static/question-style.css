@@ -42,11 +42,11 @@ fieldset.palette {
     display: block;
     margin: 10px;
     padding: 10px;
-    column-count: 4;
 }
 
 fieldset.section {
-    display: inline
+    display: inline;
+    column-count: unset;
 }
 
 input.palette.button {
