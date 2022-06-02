@@ -118,15 +118,3 @@ function add_section() {
 function delete_section(section_number) {
     document.getElementById(`section-${section_number}`).remove();
 }
-
-function reset_form() {
-    for (let section_number = section_count; section_number > 1; section_number--) {
-        const element_to_remove = document.getElementById(`section-${section_number}`);
-
-        if (element_to_remove) {
-            element_to_remove.remove();
-        }
-    }
-
-    section_count = 1;
-}
