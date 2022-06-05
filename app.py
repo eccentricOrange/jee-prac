@@ -47,7 +47,7 @@ def create_file_system():
 
 
 def back_up_recovery_data():
-    global chosen_test_data, question_section_mapping, counts, outage_time
+    global chosen_test_data, question_section_mapping, counts, outage_time, start_time
 
     with open(BACKUP_FILE_PATH, 'w') as backup_file:
         backup_data = {
@@ -55,7 +55,8 @@ def back_up_recovery_data():
             'question-section-mapping': question_section_mapping,
             'counts': counts,
             'last-known-time': datetime.now().isoformat(),
-            'outage-time': outage_time.isoformat()
+            'outage-time': outage_time.isoformat(),
+            'start-time': start_time.isoformat()
         }
 
         dump(backup_data, backup_file)
@@ -71,7 +72,7 @@ def restore_recovery_data():
             question_section_mapping = backup_data['question-section-mapping']
             counts = backup_data['counts']
             outage_time = datetime.fromisoformat(backup_data['outage-time']) + (datetime.now() - datetime.fromisoformat(backup_data['last-known-time']))
-            start_time = datetime.fromisoformat(backup_data['last-known-time'])
+            start_time = datetime.fromisoformat(backup_data['start-time'])
             test_in_progress = True
             test_selected = True
             test_configured = True
