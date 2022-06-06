@@ -46,6 +46,65 @@ def select_test_type():
     ), HTTPStatus.OK
 
 
+@app.route('/jee/configure-test/', methods=['GET', 'POST'])
+def configure_test():
+    return render_template('configure-test.html'), HTTPStatus.OK
+
+
+@app.route('/jee/receive-test-type', methods=['POST'])
+def receive_test_type():
+    global session
+    exam = session.exam
+
+    if request.method == 'POST':
+        form_data = request.form
+        exam = Exam()
+
+        if form_data['test_type'] != "custom":
+            with open(TEMPLATE_TESTS_PATH, 'r') as template_tests_file:
+                template_tests = load(template_tests_file)
+
+                if form_data['test_type'] in template_tests:
+                    exam.from_dict(data=template_tests[form_data['test_type']])
+                    exam.timing_type = form_data['timing_type']
+
+                    if exam.timing_type != 'set-time':
+                        exam.duration = int(form_data['duration']) if exam.timing_type == 'custom-time' else 0
+
+                    return redirect('/jee/start-test'), HTTPStatus.TEMPORARY_REDIRECT
+
+                return "", HTTPStatus.BAD_REQUEST
+
+        exam.timing_type = form_data['timing_type']
+        exam.duration = int(form_data['duration']) if exam.timing_type == 'custom-time' else 0
+        return redirect('/jee/configure-test'), HTTPStatus.TEMPORARY_REDIRECT
+
+    return "", HTTPStatus.BAD_REQUEST
+    
+
+@app.route('/jee/receive-test-config', methods=['POST'])
+def receive_test_config():
+    global session
+    exam = session.exam
+
+    if request.method == 'POST':
+        form_data = request.form
+        
+        if 'exam-name' in form_data:
+            exam.name = form_data['exam-name']
+
+        section_index = 0
+
+        for field in form_data:
+            if match(r'^section-\d+-name$', field):
+
+                name = form_data[field]
+                section_number = int(field.split('-')[1])
+                section_name = name.replace(' ', '-').lower()
+
+    return '', HTTPStatus.BAD_REQUEST
+
+        
 def main():
     global SERVER_MODE
 
