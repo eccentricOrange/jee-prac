@@ -32,8 +32,8 @@ Configure Test
                 id="test-type"
                 required
                 onchange="update_on_test_change()">
-                    {% for test_type in test_types %}
-                        <option value="{{ test_type['id'] }}">
+                    {% for test_type in template_tests %}
+                        <option value="{{ test_type['exam_code'] }}">
                             {{ test_type['name'] }}
                         </option>
                     {% endfor %}
