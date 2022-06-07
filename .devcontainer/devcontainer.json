@@ -24,7 +24,8 @@
 		"ms-azuretools.vscode-docker",
 		"cschleiden.vscode-github-actions",
 		"github.vscode-pull-request-github",
-		"wholroyd.jinja"
+		"wholroyd.jinja",
+		"GitHub.copilot"
 	],
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
