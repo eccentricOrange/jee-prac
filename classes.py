@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 
 
-@dataclass(init=False)
 class Question:
     question_number: int
     value = ""
@@ -11,7 +10,7 @@ class Question:
 
     def to_dict(self):
         return {
-            "question_number": self.question_number,
+            "question-number": self.question_number,
             "value": self.value,
             "visited": self.visited,
             "marked": self.marked,
@@ -19,7 +18,7 @@ class Question:
         }
 
     def from_dict(self, data):
-        self.question_number = data["question_number"]
+        self.question_number = data["question-number"]
         self.value = data["value"]
         self.visited = data["visited"]
         self.marked = data["marked"]
@@ -28,10 +27,9 @@ class Question:
         return self
 
 
-@dataclass(init=False)
 class Section:
     number_of_questions: int
-    first_question_number: int
+    first_question_number: int = 1
     last_question_number: int
 
     correct_marks: float
@@ -47,12 +45,12 @@ class Section:
 
     def to_dict(self):
         return {
-            "number_of_questions": self.number_of_questions,
-            "correct_marks": self.correct_marks,
-            "unattempted_marks": self.unattempted_marks,
+            "number-of-questions": self.number_of_questions,
+            "correct-marks": self.correct_marks,
+            "unattempted-marks": self.unattempted_marks,
             "name": self.name,
-            "test_type": self.type,
-            "section_number": self.section_number,
+            "test-type": self.type,
+            "section-number": self.section_number,
             "questions": [question.to_dict() for question in self.questions]
         }
 
@@ -60,14 +58,17 @@ class Section:
         self.number_of_questions = data["number-of-questions"]
         self.correct_marks = data["correct-marks"]
         self.unattempted_marks = data["unattempted-marks"]
+        self.wrong_marks = data["wrong-marks"]
         self.name = data["name"]
         self.type = data["type"]
         self.section_number = data["section-number"]
 
+        if "options" in data:
+            self.options = data["options"]
+
         return self
 
 
-@dataclass(init=False)
 class Exam:
     name: str
     exam_code: str
@@ -79,9 +80,9 @@ class Exam:
     def to_dict(self):
         return {
             "name": self.name,
-            "exam_code": self.exam_code,
+            "exam-code": self.exam_code,
             "duration": self.duration,
-            "timing_type": self.timing_type,
+            "timing-type": self.timing_type,
             "sections": [section.to_dict() for section in self.sections]
         }
 
@@ -95,12 +96,11 @@ class Exam:
         return self
 
 
-@dataclass(init=False)
 class Session:
     exam: Exam
-    answered_count: int
+    answered_count: int = 0
     unanswered_count: int
-    marked_count: int
+    marked_count: int = 0
     unvisited_count: int
     start_time: str
     end_time: str
@@ -110,25 +110,25 @@ class Session:
     def to_dict(self):
         return {
             "exam": self.exam.to_dict() if self.exam else None,
-            "answered_count": self.answered_count,
-            "unanswered_count": self.unanswered_count,
-            "marked_count": self.marked_count,
-            "unvisited_count": self.unvisited_count,
-            "start_time": self.start_time,
-            "end_time": self.end_time,
-            "outage_time": self.outage_time,
-            "last_known_time": self.last_known_time
+            "answered-count": self.answered_count,
+            "unanswered-count": self.unanswered_count,
+            "marked-count": self.marked_count,
+            "unvisited-count": self.unvisited_count,
+            "start-time": self.start_time,
+            "end-time": self.end_time,
+            "outage-time": self.outage_time,
+            "last-known-time": self.last_known_time
         }
 
     def from_dict(self, data: dict):
         self.exam = Exam().from_dict(data["exam"]) if data["exam"] else Exam()
-        self.answered_count = data["answered_count"]
-        self.unanswered_count = data["unanswered_count"]
-        self.marked_count = data["marked_count"]
-        self.unvisited_count = data["unvisited_count"]
-        self.start_time = data["start_time"]
-        self.end_time = data["end_time"]
-        self.outage_time = data["outage_time"]
-        self.last_known_time = data["last_known_time"]
+        self.answered_count = data["answered-count"]
+        self.unanswered_count = data["unanswered-count"]
+        self.marked_count = data["marked-count"]
+        self.unvisited_count = data["unvisited-count"]
+        self.start_time = data["start-time"]
+        self.end_time = data["end-time"]
+        self.outage_time = data["outage-time"]
+        self.last_known_time = data["last-known-time"]
 
         return self

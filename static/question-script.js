@@ -124,9 +124,9 @@ function clock() {
     const time_remaining_string = `${time_remaining.getUTCHours().toString().padStart(2, '0')}:${time_remaining.getUTCMinutes().toString().padStart(2, '0')}:${time_remaining.getUTCSeconds().toString().padStart(2, '0')}`;
     document.getElementById('timer').innerText = time_remaining_string;
 
-    if (time_remaining <= 0) {
-        window.location.href = '/jee/submit';
-    }
+    // if (time_remaining <= 0) {
+    //     window.location.href = '/jee/submit';
+    // }
 }
 
 function finish_test(method) {

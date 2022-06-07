@@ -2,7 +2,7 @@ from datetime import datetime
 from pathlib import Path
 from flask import Flask, render_template, request, redirect, send_file
 from http import HTTPStatus
-from json import dump, load
+from json import dump, dumps, load
 from re import match
 from os import environ
 from sqlite3 import connect, Row
@@ -66,6 +66,7 @@ def make_questions():
 
     for section in session.exam.sections:
         section.first_question_number = question_number
+        section.questions = []
 
         for counter in range(section.number_of_questions):
             question = Question()
@@ -174,7 +175,7 @@ def get_question():
 
                 next_question_disabled = "disabled" if question_number == session.exam.total_number_of_questions else ""
                 previous_question_disabled = "disabled" if question_number == 1 else ""
-                mark_button_text = "Unmark" if question.marked else "Mark"
+                mark_button_text = "Unmark" if question.marked == 'marked' else "Mark"
 
                 if question.visited == "unvisited":
                     session.unvisited_count -= 1
@@ -189,6 +190,21 @@ def get_question():
                     timer_type = "Untimed Test"
                     time_remaining_string = ""
 
+                data = {
+                    'question-number': question_number,
+                    'next-question-disabled': next_question_disabled,
+                    'previous-question-disabled': previous_question_disabled,
+                    'mark-button-text': mark_button_text,
+                    'answered-count': session.answered_count,
+                    'unanswered-count': session.unanswered_count,
+                    'unvisited-count': session.unvisited_count,
+                    'marked-count': session.marked_count,
+                    'timer-type': timer_type,
+                    'time-remaining-string': time_remaining_string,
+                    'exam': session.exam.to_dict(),
+                    'section-type': section.type,
+                }
+                
                 if section.type == 'mcq':
                     choices = [
                         {
@@ -197,6 +213,13 @@ def get_question():
                         }
                         for option in section.options
                     ]
+
+                    data['choices'] = choices
+
+                return render_template(f'{section.type}.html', data=data), HTTPStatus.OK
+
+
+    return "", HTTPStatus.BAD_REQUEST
 
                 
 

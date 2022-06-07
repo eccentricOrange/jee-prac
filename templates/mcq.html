@@ -1,7 +1,7 @@
 {% extends "question.html" %}
 
     {% block question %}
-        {% for choice in choices %}
+        {% for choice in data['choices'] %}
             {% set choice_option = choice['option'] %}
             {% set choice_value = choice['value'] %}
             <div class="mcq-option">
@@ -9,8 +9,8 @@
                     name="question"
                     id="{{ choice_option }}"
                     value="{{ choice_option }}"
-                    onsubmit="mcq_store_value({{ question_number }})"
-                    onchange="mcq_store_value({{ question_number }})"
+                    onsubmit="mcq_store_value({{ data['question_number'] }})"
+                    onchange="mcq_store_value({{ data['question_number'] }})"
                     {{
                     choice_value
                     }}>
@@ -19,5 +19,5 @@
         {% endfor %}
         <input type="button"
             value="Clear"
-            onclick="clear_mcq({{ question_number }})">
+            onclick="clear_mcq({{ data['question_number'] }})">
     {% endblock %}

@@ -1,13 +1,13 @@
 {% extends "layout.html" %}
 
 {% block title %}
-{{ question_number }}: {{ question_type }}
+{{ data['question-number'] }}: {{ data['section-type'] }}
 {% endblock %}
 
 {% block script %}
 <script>
-    const time_remaining_string = "{{ time_remaining_string }}";
-    const timer_type = "{{ timer_type }}";
+    const time_remaining_string = "{{ data['time-remaining-string'] }}";
+    const timer_type = "{{ data['timer-type'] }}";
 </script>
 <script src="{{ url_for('static', filename='question-script.js') }}"></script>
 {% endblock %}
@@ -21,11 +21,11 @@
 
 <body onload="init()">
     <h1>
-        {{ test }}: Question {{ question_number }}
+        {{ data['exam']['name'] }}: Question {{ data['question-number'] }}
     </h1>
     <div id="time">
         <span id="timer-type">
-            {{ timer_type }}
+            {{ data['timer-type'] }}
         </span>
 
         <span id="timer"></span>
@@ -33,13 +33,13 @@
 
     <fieldset id="question-section">
         <legend>
-            {{ question_type }} Question
+            {{ data['section-type'] }} Question
         </legend>
         {% block question %} {% endblock %}
     </fieldset>
 
     <fieldset class="not-bordered palette">
-        {% for section in sections %}
+        {% for section in data['exam']['sections'] %}
         <fieldset class="not-bordered palette section">
             <legend>
                 {{ section['name'] }}
@@ -70,19 +70,19 @@
     <table id="statistics">
         <tr>
             <th>Answered</th>
-            <td id="answered-count">{{ counts['answered'] }}</td>
+            <td id="answered-count">{{ data['answered-count'] }}</td>
         </tr>
         <tr>
             <th>Unanswered</th>
-            <td id="unanswered-count">{{ counts['unanswered'] }}</td>
+            <td id="unanswered-count">{{ data['unanswered-count'] }}</td>
         </tr>
         <tr>
             <th>Marked for review</th>
-            <td id="marked-count">{{ counts['marked'] }}</td>
+            <td id="marked-count">{{ data['marked-count'] }}</td>
         </tr>
         <tr>
             <th>Unvisited</th>
-            <td id="unvisited-count">{{ counts['unvisited'] }}</td>
+            <td id="unvisited-count">{{ data['unvisited-count'] }}</td>
         </tr>
     </table>
 
@@ -93,7 +93,7 @@
             value="Previous"
             class="control"
             id="previous"
-            onclick="go_to_previous_question({{ question_number }})"
+            onclick="go_to_previous_question({{ data['question-number'] }})"
             {{
             previous_question_disabled
             }}>
@@ -101,15 +101,15 @@
             value="Next"
             class="control"
             id="next"
-            onclick="go_to_next_question({{ question_number }})"
+            onclick="go_to_next_question({{ data['question-number'] }})"
             {{
             next_question_disabled
             }}>
         <input type="button"
-            value="{{ mark_button_text }}"
+            value="{{ data['mark-button-text'] }}"
             class="control"
             id="mark"
-            onclick="mark_question({{ question_number }})">
+            onclick="mark_question({{ data['question-number'] }})">
         <input type="button"
             value="Quit"
             class="control"

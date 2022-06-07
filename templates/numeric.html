@@ -5,12 +5,12 @@
         <input type="number"
             name="question"
             id="question"
-            value="{{ value }}"
-            onchange="numeric_store_value({{ question_number }})"
-            onsubmit="numeric_store_value({{ question_number }})">
+            value="{{ data['value'] }}"
+            onchange="numeric_store_value({{ data['question_number'] }})"
+            onsubmit="numeric_store_value({{ data['question_number'] }})">
 
         <input type="button"
             value="Clear"
-            onclick="clear_numeric({{ question_number }})">
+            onclick="clear_numeric({{ data['question_number'] }})">
 
     {% endblock %}
