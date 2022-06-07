@@ -1,16 +1,13 @@
 from dataclasses import dataclass
 
 
-@dataclass()
+@dataclass(init=False)
 class Question:
     question_number: int
     value = ""
     visited = "unvisited"
     marked = "unmarked"
     answered = "unanswered"
-
-    def __init__(self) -> None:
-        pass
 
     def to_dict(self):
         return {
@@ -31,22 +28,22 @@ class Question:
         return self
 
 
-@dataclass()
+@dataclass(init=False)
 class Section:
     number_of_questions: int
+    first_question_number: int
+    last_question_number: int
 
-    correct_marks: int
-    unattempted_marks: int
-    wrong_marks: int
+    correct_marks: float
+    unattempted_marks: float
+    wrong_marks: float
 
     name: str
-    test_type: str
+    type: str
+    options: list[str]
     section_number: int
 
     questions: list[Question]
-
-    def __init__(self) -> None:
-        pass
 
     def to_dict(self):
         return {
@@ -54,33 +51,30 @@ class Section:
             "correct_marks": self.correct_marks,
             "unattempted_marks": self.unattempted_marks,
             "name": self.name,
-            "test_type": self.test_type,
+            "test_type": self.type,
             "section_number": self.section_number,
             "questions": [question.to_dict() for question in self.questions]
         }
 
     def from_dict(self, data: dict):
-        self.number_of_questions = data["number_of_questions"]
-        self.correct_marks = data["correct_marks"]
-        self.unattempted_marks = data["unattempted_marks"]
+        self.number_of_questions = data["number-of-questions"]
+        self.correct_marks = data["correct-marks"]
+        self.unattempted_marks = data["unattempted-marks"]
         self.name = data["name"]
-        self.test_type = data["test_type"]
-        self.section_number = data["section_number"]
-        self.questions = [Question().from_dict(question) for question in data["questions"]]
+        self.type = data["type"]
+        self.section_number = data["section-number"]
 
         return self
 
 
-@dataclass()
+@dataclass(init=False)
 class Exam:
     name: str
     exam_code: str
     duration: int
     sections: list[Section]
     timing_type: str
-
-    def __init__(self) -> None:
-        pass
+    total_number_of_questions: int
 
     def to_dict(self):
         return {
@@ -93,15 +87,15 @@ class Exam:
 
     def from_dict(self, data: dict):
         self.name = data["name"]
-        self.exam_code = data["exam_code"]
+        self.exam_code = data["exam-code"]
         self.duration = data["duration"]
-        self.timing_type = data["timing_type"]
-        self.sections = [Section().from_dict(section) for section in data["sections"]]
+        self.sections = [Section().from_dict(section)
+                         for section in data["sections"]]
 
         return self
 
 
-@dataclass()
+@dataclass(init=False)
 class Session:
     exam: Exam
     answered_count: int
@@ -112,9 +106,6 @@ class Session:
     end_time: str
     outage_time: str
     last_known_time: str
-
-    def __init__(self) -> None:
-        pass
 
     def to_dict(self):
         return {

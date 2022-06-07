@@ -39,9 +39,21 @@ Configure Test
                 <label for="section-1-questions-type">Questions type</label>
                 <select name="section-1-questions-type"
                     id="section-1-questions-type"
-                    required>
+                    required
+                    onchange="change_question_type(1)">
                     <option value="mcq">Multiple Choice Questions (MCQ)</option>
                     <option value="numeric">Numeric</option>
+                    <option value="Text">Text</option>
+                </select>
+
+                <label for="section-1-options"
+                    id="section-1-options-label">MCQ Options</label>
+                <select name="section-1-options"
+                    id="section-1-options"
+                    required>
+                    <option value="A">A</option>
+                    <option value="a">a</option>
+                    <option value="1">1</option>
                 </select>
 
                 <label for="section-1-number-of-questions">Number of questions</label>

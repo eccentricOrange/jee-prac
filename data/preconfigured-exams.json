@@ -82,7 +82,7 @@
                 "section-name": "mathematics-numeric"
             }
         ],
-        "exam_code": "jee-mains"
+        "exam-code": "jee-mains"
     },
     {
         "name": "JEE Mains (Old Pattern)",
@@ -137,7 +137,7 @@
                 "section-name": "mathematics-mcq"
             }
         ],
-        "exam_code": "jee-mains-old"
+        "exam-code": "jee-mains-old"
     },
     {
         "name": "BITSAT",
@@ -224,7 +224,7 @@
                 "section-name": "mathematics-mcq"
             }
         ],
-        "exam_code": "bitsat"
+        "exam-code": "bitsat"
     },
     {
         "name": "KCET",
@@ -279,7 +279,7 @@
                 "section-name": "mathematics-mcq"
             }
         ],
-        "exam_code": "kcet"
+        "exam-code": "kcet"
     },
     {
         "name": "VITEEE",
@@ -366,7 +366,7 @@
                 "section-name": "english-mcq"
             }
         ],
-        "exam_code": "viteee"
+        "exam-code": "viteee"
     },
     {
         "name": "IIIT-H UGEE",
@@ -405,6 +405,6 @@
                 "section-name": "reap-mcq"
             }
         ],
-        "exam_code": "ugee"
+        "exam-code": "ugee"
     }
 ]

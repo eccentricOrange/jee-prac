@@ -35,6 +35,51 @@ def create_file_system():
         TEMPLATE_TESTS_PATH.write_text((Path('data') / 'preconfigured-exams.json').read_text())
 
 
+def get_sections_from_form(form_data):
+    exam_section_number = 0
+
+    for field in form_data:
+        if match(r'^section-\d+-name$', field):
+            section = Section()
+
+            form_section_number = field.split('-')[1]
+
+            section.name = form_data[field]
+            section.section_number = exam_section_number
+            section.type = form_data[f'section-{form_section_number}-questions-type']
+            section.number_of_questions = int(form_data[f'section-{form_section_number}-number-of-questions'])
+            section.correct_marks = float(form_data[f'section-{form_section_number}-marks-if-correct'])
+            section.unattempted_marks = float(form_data[f'section-{form_section_number}-marks-if-unattempted'])
+            section.wrong_marks = float(form_data[f'section-{form_section_number}-marks-if-wrong'])
+
+            if section.type == "mcq":
+                section.options = form_data[f'section-{form_section_number}-options'].split(',')
+
+            exam_section_number += 1
+
+            yield section
+
+
+def make_questions():
+    global session
+    question_number = 1
+
+    for section in session.exam.sections:
+        section.first_question_number = question_number
+
+        for counter in range(section.number_of_questions):
+            question = Question()
+            question.question_number = question_number + counter
+            section.questions.append(question)
+
+        question_number += section.number_of_questions
+        section.last_question_number = question_number - 1
+
+    session.exam.total_number_of_questions = question_number - 1
+    session.unanswered_count = session.exam.total_number_of_questions
+    session.unvisited_count = session.exam.total_number_of_questions
+
+
 @app.route('/jee/', methods=['GET', 'POST'])
 def select_test_type():
     with open(TEMPLATE_TESTS_PATH, 'r') as template_tests_file:
@@ -54,28 +99,31 @@ def configure_test():
 @app.route('/jee/receive-test-type', methods=['POST'])
 def receive_test_type():
     global session
-    exam = session.exam
+    exam = Exam()
 
     if request.method == 'POST':
         form_data = request.form
         exam = Exam()
 
-        if form_data['test_type'] != "custom":
+        if form_data['test-type'] != "custom":
             with open(TEMPLATE_TESTS_PATH, 'r') as template_tests_file:
                 template_tests = load(template_tests_file)
 
-                if form_data['test_type'] in template_tests:
-                    exam.from_dict(data=template_tests[form_data['test_type']])
-                    exam.timing_type = form_data['timing_type']
+                for test in template_tests:
 
-                    if exam.timing_type != 'set-time':
-                        exam.duration = int(form_data['duration']) if exam.timing_type == 'custom-time' else 0
+                    if test['exam-code'] == form_data['test-type']:
+                        exam.from_dict(data=test)
+                        exam.timing_type = form_data['timing-type']
 
-                    return redirect('/jee/start-test'), HTTPStatus.TEMPORARY_REDIRECT
+                        if exam.timing_type != 'set-time':
+                            exam.duration = int(form_data['duration']) if exam.timing_type == 'custom-time' else 0
+
+                        session.exam = exam
+                        return redirect('/jee/start-test'), HTTPStatus.TEMPORARY_REDIRECT
 
                 return "", HTTPStatus.BAD_REQUEST
 
-        exam.timing_type = form_data['timing_type']
+        exam.timing_type = form_data['timing-type']
         exam.duration = int(form_data['duration']) if exam.timing_type == 'custom-time' else 0
         return redirect('/jee/configure-test'), HTTPStatus.TEMPORARY_REDIRECT
 
@@ -85,7 +133,7 @@ def receive_test_type():
 @app.route('/jee/receive-test-config', methods=['POST'])
 def receive_test_config():
     global session
-    exam = session.exam
+    exam = Exam()
 
     if request.method == 'POST':
         form_data = request.form
@@ -93,16 +141,64 @@ def receive_test_config():
         if 'exam-name' in form_data:
             exam.name = form_data['exam-name']
 
-        section_index = 0
+        exam.sections = list(get_sections_from_form(form_data))
 
-        for field in form_data:
-            if match(r'^section-\d+-name$', field):
-
-                name = form_data[field]
-                section_number = int(field.split('-')[1])
-                section_name = name.replace(' ', '-').lower()
+        session.exam = exam
+        return redirect('/jee/start-test'), HTTPStatus.TEMPORARY_REDIRECT
 
     return '', HTTPStatus.BAD_REQUEST
+
+
+@app.route('/jee/start-test', methods=['GET', 'POST'])
+def start_test():
+    global session
+
+    session.start_time = datetime.now().isoformat()
+    session.outage_time = datetime.fromtimestamp(0).isoformat()
+
+    make_questions()
+    return redirect('/jee/question?question-number=1'), HTTPStatus.TEMPORARY_REDIRECT
+
+
+@app.route('/jee/question', methods=['GET', 'POST'])
+def get_question():
+    global session
+
+    if session.exam:
+        
+        question_number = int(request.args.get('question-number'))  # type: ignore
+
+        for section in session.exam.sections:
+            if section.first_question_number <= question_number <= section.last_question_number:
+                question = section.questions[question_number - section.first_question_number]
+
+                next_question_disabled = "disabled" if question_number == session.exam.total_number_of_questions else ""
+                previous_question_disabled = "disabled" if question_number == 1 else ""
+                mark_button_text = "Unmark" if question.marked else "Mark"
+
+                if question.visited == "unvisited":
+                    session.unvisited_count -= 1
+                    question.visited = "visited"
+
+                if session.exam.timing_type != "untimed":
+                    time_remaining = datetime.fromtimestamp(session.exam.duration * 60) - ((datetime.now() - datetime.fromisoformat(session.start_time)) + datetime.fromisoformat(session.outage_time))
+                    time_remaining_string = datetime.fromtimestamp(time_remaining.total_seconds()).isoformat()
+                    timer_type = "Time Remaining:"
+
+                else:
+                    timer_type = "Untimed Test"
+                    time_remaining_string = ""
+
+                if section.type == 'mcq':
+                    choices = [
+                        {
+                            'option': option,
+                            'value': "checked" if option == question.value else ""
+                        }
+                        for option in section.options
+                    ]
+
+                
 
         
 def main():
