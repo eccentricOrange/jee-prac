@@ -1,3 +1,11 @@
+function get_test(test_name) {
+    for (let exam of template_tests) {
+        if (exam["exam-code"] == test_name) {
+            return exam;
+        }
+    }
+}
+
 function init() {
     const form = document.getElementById("select-test-type-form");
     const default_test = "jee-mains";
@@ -7,7 +15,7 @@ function init() {
 
     form.querySelector("#timing-type").value = "set-time";
 
-    const time = template_tests[default_test]["duration"];
+    const time = get_test(default_test)["duration"];
     form.querySelector("#duration").value = time;
     form.querySelector("#duration").setAttribute("disabled", "disabled");
 }
@@ -32,7 +40,7 @@ function update_on_test_change() {
     
     if (form.querySelector("#timing-type").value == "set-time") {
         const test_type = form.querySelector("#test-type");
-        const time = template_tests[test_type.value]["duration"];
+        const time = get_test(test_type.value)["duration"];
         form.querySelector("#duration").value = time;
     }
 

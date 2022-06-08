@@ -28,6 +28,7 @@ function get_new_section(section_number) {
     questions_type_select.setAttribute("name", `section-${section_number}-questions-type`);
     questions_type_select.setAttribute("id", `section-${section_number}-questions-type`);
     questions_type_select.setAttribute("required", "");
+    questions_type_select.setAttribute("onchange", `change_question_type(${section_number})`);
 
     var mcq_questions_option = document.createElement("option");
     mcq_questions_option.setAttribute("value", "mcq");
@@ -37,8 +38,40 @@ function get_new_section(section_number) {
     numeric_questions_option.setAttribute("value", "numeric");
     numeric_questions_option.innerHTML = "Numeric";
 
+    var text_questions_option = document.createElement("option");
+    text_questions_option.setAttribute("value", "text");
+    text_questions_option.innerHTML = "Text";
+
     questions_type_select.appendChild(mcq_questions_option);
     questions_type_select.appendChild(numeric_questions_option);
+    questions_type_select.appendChild(text_questions_option);
+
+    // input for MCQ options
+    var mcq_options_label = document.createElement("label");
+    mcq_options_label.innerHTML = "MCQ Options";
+    mcq_options_label.setAttribute("for", `section-${section_number}-options`);
+    mcq_options_label.setAttribute("id", `section-${section_number}-options-label`);
+
+    var mcq_options_input = document.createElement("select");
+    mcq_options_input.setAttribute("name", `section-${section_number}-options`);
+    mcq_options_input.setAttribute("id", `section-${section_number}-options`);
+    mcq_options_input.setAttribute("required", "");
+
+    var mcq_options_option_A = document.createElement("option");
+    mcq_options_option_A.setAttribute("value", "A,B,C,D");
+    mcq_options_option_A.innerHTML = "A,B,C,D";
+
+    var mcq_options_option_a = document.createElement("option");
+    mcq_options_option_a.setAttribute("value", "a,b,c,d");
+    mcq_options_option_a.innerHTML = "a,b,c,d";
+
+    var mcq_options_option_1 = document.createElement("option");
+    mcq_options_option_1.setAttribute("value", "1,2,3,4");
+    mcq_options_option_1.innerHTML = "1,2,3,4";
+
+    mcq_options_input.appendChild(mcq_options_option_A);
+    mcq_options_input.appendChild(mcq_options_option_a);
+    mcq_options_input.appendChild(mcq_options_option_1);
 
     // input for questions count
     var number_of_questions_label = document.createElement("label");
@@ -97,6 +130,8 @@ function get_new_section(section_number) {
     host_section.appendChild(name_input);
     host_section.appendChild(questions_type_label);
     host_section.appendChild(questions_type_select);
+    host_section.appendChild(mcq_options_label);
+    host_section.appendChild(mcq_options_input);
     host_section.appendChild(number_of_questions_label);
     host_section.appendChild(number_of_questions_input);
     host_section.appendChild(marks_if_correct_label);
@@ -117,4 +152,14 @@ function add_section() {
 
 function delete_section(section_number) {
     document.getElementById(`section-${section_number}`).remove();
+}
+
+function change_question_type(section_number) {
+    if (document.getElementById(`section-${section_number}-questions-type`).value == "mcq") {
+        document.getElementById(`section-${section_number}-options`).style.display = "block";
+        document.getElementById(`section-${section_number}-options-label`).style.display = "block";
+    } else {
+        document.getElementById(`section-${section_number}-options`).style.display = "none";
+        document.getElementById(`section-${section_number}-options-label`).style.display = "none";
+    }
 }

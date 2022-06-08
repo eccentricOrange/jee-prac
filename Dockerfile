@@ -10,7 +10,8 @@ RUN make install
 RUN export PATH="/usr/local/lib:$PATH"
 
 # install node
-RUN apt install -y nodejs
+RUN apt-get update
+RUN apt-get install nodejs -y
 
 # create a new user who will actually run stuff
 ARG USERNAME=dev

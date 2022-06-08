@@ -1,5 +1,5 @@
-{
-    "jee-mains": {
+[
+    {
         "name": "JEE Mains",
         "duration": 180,
         "sections": [
@@ -81,9 +81,10 @@
                 "section-number": 6,
                 "section-name": "mathematics-numeric"
             }
-        ]
+        ],
+        "exam-code": "jee-mains"
     },
-    "jee-mains-old": {
+    {
         "name": "JEE Mains (Old Pattern)",
         "duration": 180,
         "sections": [
@@ -135,9 +136,10 @@
                 "section-number": 3,
                 "section-name": "mathematics-mcq"
             }
-        ]
+        ],
+        "exam-code": "jee-mains-old"
     },
-    "bitsat": {
+    {
         "name": "BITSAT",
         "duration": 180,
         "sections": [
@@ -221,9 +223,10 @@
                 "section-number": 5,
                 "section-name": "mathematics-mcq"
             }
-        ]
+        ],
+        "exam-code": "bitsat"
     },
-    "kcet": {
+    {
         "name": "KCET",
         "duration": 270,
         "sections": [
@@ -275,9 +278,10 @@
                 "section-number": 3,
                 "section-name": "mathematics-mcq"
             }
-        ]
+        ],
+        "exam-code": "kcet"
     },
-    "viteee": {
+    {
         "name": "VITEEE",
         "duration": 90,
         "sections": [
@@ -361,9 +365,10 @@
                 "section-number": 5,
                 "section-name": "english-mcq"
             }
-        ]
+        ],
+        "exam-code": "viteee"
     },
-    "ugee": {
+    {
         "name": "IIIT-H UGEE",
         "duration": 180,
         "sections": [
@@ -399,6 +404,7 @@
                 "section-number": 2,
                 "section-name": "reap-mcq"
             }
-        ]
+        ],
+        "exam-code": "ugee"
     }
-}
+]
