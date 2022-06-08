@@ -9,7 +9,7 @@
     const time_remaining_string = "{{ data['time-remaining-string'] }}";
     const timer_type = "{{ data['timer-type'] }}";
 </script>
-<script src="{{ url_for('static', filename='question-script.js') }}"></script>
+<script src="{{ url_for('static', filename='question-script.js') }}" defer></script>
 {% endblock %}
 
 {% block style %}
@@ -49,7 +49,7 @@
                 {% set marked = question['marked'] %}
                 {% set visited = question['visited'] %}
                 {% set answered = question['answered'] %}
-                {% if number == question_number %}
+                {% if number == data['question-number'] %}
                     <input type="button"
                         value="{{ number }}"
                         id="question-{{ number }}"

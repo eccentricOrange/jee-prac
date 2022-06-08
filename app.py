@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from flask import Flask, render_template, request, redirect, send_file
 from http import HTTPStatus
@@ -154,7 +154,7 @@ def receive_test_config():
 def start_test():
     global session
 
-    session.start_time = datetime.now().isoformat()
+    session.start_time = datetime.now(timezone.utc).isoformat()
     session.outage_time = datetime.fromtimestamp(0).isoformat()
 
     make_questions()
@@ -182,7 +182,7 @@ def get_question():
                     question.visited = "visited"
 
                 if session.exam.timing_type != "untimed":
-                    time_remaining = datetime.fromtimestamp(session.exam.duration * 60) - ((datetime.now() - datetime.fromisoformat(session.start_time)) + datetime.fromisoformat(session.outage_time))
+                    time_remaining = datetime.fromtimestamp(session.exam.duration * 60) - ((datetime.now(timezone.utc) - datetime.fromisoformat(session.start_time)) + datetime.fromisoformat(session.outage_time))
                     time_remaining_string = datetime.fromtimestamp(time_remaining.total_seconds()).isoformat()
                     timer_type = "Time Remaining:"
 
@@ -221,7 +221,72 @@ def get_question():
 
     return "", HTTPStatus.BAD_REQUEST
 
-                
+@app.route('/jee/mark', methods=['POST'])
+def mark():
+    global session
+
+    form_data = dict(request.get_json(force=True))
+    question_number = int(form_data['question-number'])
+
+    for section in session.exam.sections:
+        if section.first_question_number <= question_number <= section.last_question_number:
+            question = section.questions[question_number - section.first_question_number]
+
+            if question.marked == 'unmarked':
+                session.marked_count += 1
+            question.marked = 'marked'
+
+            return "", HTTPStatus.OK
+
+    return "", HTTPStatus.BAD_REQUEST
+
+
+@app.route('/jee/unmark', methods=['POST'])
+def unmark():
+    global session
+
+    form_data = dict(request.get_json(force=True))
+    question_number = int(form_data['question-number'])
+
+    for section in session.exam.sections:
+        if section.first_question_number <= question_number <= section.last_question_number:
+            question = section.questions[question_number - section.first_question_number]
+
+            if question.marked == 'marked':
+                session.marked_count -= 1
+            question.marked = 'unmarked'
+
+            return "", HTTPStatus.OK
+
+    return "", HTTPStatus.BAD_REQUEST
+
+@app.route('/jee/receive-value', methods=['POST'])
+def receive_value():
+    global session
+
+    form_data = dict(request.get_json(force=True))
+    question_number = int(form_data['question-number'])
+    value = form_data['value']
+
+    for section in session.exam.sections:
+        if section.first_question_number <= question_number <= section.last_question_number:
+            question = section.questions[question_number - section.first_question_number]
+            old_value = question.value
+            question.value = value
+
+            if (not old_value) and value:
+                session.answered_count += 1
+                session.unanswered_count -= 1
+                question.answered = 'answered'
+
+            if old_value and (not value):
+                session.answered_count -= 1
+                session.unanswered_count += 1
+                question.answered = 'unanswered'
+
+            return "", HTTPStatus.OK
+
+    return "", HTTPStatus.BAD_REQUEST
 
         
 def main():

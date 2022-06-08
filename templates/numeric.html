@@ -6,11 +6,11 @@
             name="question"
             id="question"
             value="{{ data['value'] }}"
-            onchange="numeric_store_value({{ data['question_number'] }})"
-            onsubmit="numeric_store_value({{ data['question_number'] }})">
+            onchange="numeric_store_value({{ data['question-number'] }})"
+            onsubmit="numeric_store_value({{ data['question-number'] }})">
 
         <input type="button"
             value="Clear"
-            onclick="clear_numeric({{ data['question_number'] }})">
+            onclick="clear_numeric({{ data['question-number'] }})">
 
     {% endblock %}
