@@ -1,13 +1,15 @@
-from datetime import datetime, timezone
-from pathlib import Path
-from flask import Flask, render_template, request, redirect, send_file
-from http import HTTPStatus
-from json import dump, dumps, load
-from re import match
-from os import environ
-from sqlite3 import connect, Row
 from csv import DictWriter
-from classes import Session, Exam, Section, Question
+from datetime import datetime, timedelta, timezone
+from http import HTTPStatus
+from json import dump, load
+from os import environ
+from pathlib import Path
+from re import match
+from sqlite3 import Row, connect
+
+from flask import Flask, redirect, render_template, request, send_file
+
+from classes import Exam, Question, Section, Session
 
 app = Flask(__name__)
 session = Session()
@@ -34,6 +36,22 @@ def create_file_system():
         TEMPLATE_TESTS_PATH.touch(exist_ok=True)
         TEMPLATE_TESTS_PATH.write_text((Path('data') / 'preconfigured-exams.json').read_text())
 
+def back_up_recovery_data():
+    global session
+
+    with open(BACKUP_FILE_PATH, 'w') as backup_file:
+        session.last_known_time = datetime.now(timezone.utc).isoformat()
+        dump(session.to_dict(), backup_file)
+
+def restore_recovery_data():
+    global session
+
+    if BACKUP_FILE_PATH.exists():
+        with open(BACKUP_FILE_PATH, 'r') as backup_file:
+            session.from_dict(load(backup_file))
+
+            session.outage_time = (datetime.fromisoformat(session.outage_time) + (datetime.now(timezone.utc) - datetime.fromisoformat(session.last_known_time))).isoformat()
+            print(session.outage_time)
 
 def get_sections_from_form(form_data):
     exam_section_number = 0
@@ -80,85 +98,118 @@ def make_questions():
     session.unanswered_count = session.exam.total_number_of_questions
     session.unvisited_count = session.exam.total_number_of_questions
 
+def create_csv_from_db(table_name: str) -> Path:
+    csv_filepath = ACTIVE_DIRECTORY / f'{table_name}.csv'
+    csv_filepath.touch(exist_ok=True)
+
+    with connect(MAIN_DATABASE_PATH) as connection, open(csv_filepath, 'w') as csv_file:
+        connection.row_factory = Row
+        db_data = connection.execute(f'SELECT * FROM {table_name}').fetchall()
+        csv_writer = DictWriter(csv_file, fieldnames=db_data[0].keys())
+        csv_writer.writeheader()
+        csv_writer.writerows(map(dict, db_data))
+
+    return csv_filepath
+
 
 @app.route('/jee/', methods=['GET', 'POST'])
 def select_test_type():
-    with open(TEMPLATE_TESTS_PATH, 'r') as template_tests_file:
-        template_tests = load(template_tests_file)
+    if not session.exam:
 
-    return render_template(
-        'select-test-type.html',
-        template_tests=template_tests,
-    ), HTTPStatus.OK
+        with open(TEMPLATE_TESTS_PATH, 'r') as template_tests_file:
+            template_tests = load(template_tests_file)
+
+        return render_template(
+            'select-test-type.html',
+            template_tests=template_tests,
+        ), HTTPStatus.OK
+
+    return "You are already in a test session.", HTTPStatus.IM_USED
 
 
 @app.route('/jee/configure-test/', methods=['GET', 'POST'])
 def configure_test():
-    return render_template('configure-test.html'), HTTPStatus.OK
+    if not session.exam:
+        return render_template('configure-test.html'), HTTPStatus.OK
+
+    return "You are already in a test session.", HTTPStatus.IM_USED
 
 
 @app.route('/jee/receive-test-type', methods=['POST'])
 def receive_test_type():
     global session
-    exam = Exam()
-
-    if request.method == 'POST':
-        form_data = request.form
+    
+    if not session.exam:
         exam = Exam()
 
-        if form_data['test-type'] != "custom":
-            with open(TEMPLATE_TESTS_PATH, 'r') as template_tests_file:
-                template_tests = load(template_tests_file)
+        if request.method == 'POST':
+            form_data = request.form
+            exam = Exam()
 
-                for test in template_tests:
+            if form_data['test-type'] != "custom":
+                with open(TEMPLATE_TESTS_PATH, 'r') as template_tests_file:
+                    template_tests = load(template_tests_file)
 
-                    if test['exam-code'] == form_data['test-type']:
-                        exam.from_dict(data=test)
-                        exam.timing_type = form_data['timing-type']
+                    for test in template_tests:
 
-                        if exam.timing_type != 'set-time':
-                            exam.duration = int(form_data['duration']) if exam.timing_type == 'custom-time' else 0
+                        if test['exam-code'] == form_data['test-type']:
+                            exam.from_dict(data=test)
+                            exam.timing_type = form_data['timing-type']
 
-                        session.exam = exam
-                        return redirect('/jee/start-test'), HTTPStatus.TEMPORARY_REDIRECT
+                            if exam.timing_type != 'set-time':
+                                exam.duration = int(form_data['duration']) if exam.timing_type == 'custom-time' else 0
 
-                return "", HTTPStatus.BAD_REQUEST
+                            session.exam = exam
+                            return redirect('/jee/start-test'), HTTPStatus.TEMPORARY_REDIRECT
 
-        exam.timing_type = form_data['timing-type']
-        exam.duration = int(form_data['duration']) if exam.timing_type == 'custom-time' else 0
-        return redirect('/jee/configure-test'), HTTPStatus.TEMPORARY_REDIRECT
+                    return "", HTTPStatus.BAD_REQUEST
 
-    return "", HTTPStatus.BAD_REQUEST
+            exam.timing_type = form_data['timing-type']
+            exam.duration = int(form_data['duration']) if exam.timing_type == 'custom-time' else 0
+            return redirect('/jee/configure-test'), HTTPStatus.TEMPORARY_REDIRECT
+
+        return "", HTTPStatus.BAD_REQUEST
+
+    return "You are already in a test session.", HTTPStatus.IM_USED
     
 
 @app.route('/jee/receive-test-config', methods=['POST'])
 def receive_test_config():
     global session
-    exam = Exam()
 
-    if request.method == 'POST':
-        form_data = request.form
-        
-        if 'exam-name' in form_data:
-            exam.name = form_data['exam-name']
+    if not session.exam:
+        exam = Exam()
 
-        exam.sections = list(get_sections_from_form(form_data))
+        if request.method == 'POST':
+            form_data = request.form
+            
+            if 'exam-name' in form_data:
+                exam.name = form_data['exam-name']
 
-        session.exam = exam
-        return redirect('/jee/start-test'), HTTPStatus.TEMPORARY_REDIRECT
+            exam.sections = list(get_sections_from_form(form_data))
 
-    return '', HTTPStatus.BAD_REQUEST
+            session.exam = exam
+            return redirect('/jee/start-test'), HTTPStatus.TEMPORARY_REDIRECT
+
+        return '', HTTPStatus.BAD_REQUEST
+
+    return "You are already in a test session.", HTTPStatus.IM_USED
 
 
 @app.route('/jee/start-test', methods=['GET', 'POST'])
 def start_test():
     global session
 
-    session.start_time = datetime.now(timezone.utc).isoformat()
-    session.outage_time = datetime.fromtimestamp(0).isoformat()
+    if not session.start_time:
 
-    make_questions()
-    return redirect('/jee/question?question-number=1'), HTTPStatus.TEMPORARY_REDIRECT
+        session.start_time = datetime.now(timezone.utc).isoformat()
+        session.outage_time = '1970-01-01T00:00:00+00:00'
+        
+        make_questions()
+
+        return redirect('/jee/question?question-number=1'), HTTPStatus.TEMPORARY_REDIRECT
+
+    return "You are already in a test session.", HTTPStatus.IM_USED
 
 
 @app.route('/jee/question', methods=['GET', 'POST'])
@@ -168,6 +219,7 @@ def get_question():
     if session.exam:
         
         question_number = int(request.args.get('question-number'))  # type: ignore
+
 
         for section in session.exam.sections:
             if section.first_question_number <= question_number <= section.last_question_number:
@@ -182,8 +234,12 @@ def get_question():
                     question.visited = "visited"
 
                 if session.exam.timing_type != "untimed":
-                    time_remaining = datetime.fromtimestamp(session.exam.duration * 60) - ((datetime.now(timezone.utc) - datetime.fromisoformat(session.start_time)) + datetime.fromisoformat(session.outage_time))
-                    time_remaining_string = datetime.fromtimestamp(time_remaining.total_seconds()).isoformat()
+                    duration = datetime.fromtimestamp(session.exam.duration * 60).replace(tzinfo=timezone.utc)
+                    now = datetime.now(timezone.utc)
+                    start_time = datetime.fromisoformat(session.start_time)
+                    outage_time = datetime.fromisoformat(session.outage_time)
+                    time_remaining = duration - (now - start_time) + timedelta(seconds=outage_time.timestamp())
+                    time_remaining_string = time_remaining.replace(tzinfo=timezone.utc).isoformat()
                     timer_type = "Time Remaining:"
 
                 else:
@@ -216,83 +272,206 @@ def get_question():
 
                     data['choices'] = choices
 
+                back_up_recovery_data()
                 return render_template(f'{section.type}.html', data=data), HTTPStatus.OK
 
+        return "", HTTPStatus.BAD_REQUEST
 
-    return "", HTTPStatus.BAD_REQUEST
+    return "", HTTPStatus.NOT_IMPLEMENTED
 
 @app.route('/jee/mark', methods=['POST'])
 def mark():
     global session
 
-    form_data = dict(request.get_json(force=True))
-    question_number = int(form_data['question-number'])
+    if session.exam:
 
-    for section in session.exam.sections:
-        if section.first_question_number <= question_number <= section.last_question_number:
-            question = section.questions[question_number - section.first_question_number]
+        form_data = dict(request.get_json(force=True))  # type: ignore
+        question_number = int(form_data['question-number'])
 
-            if question.marked == 'unmarked':
-                session.marked_count += 1
-            question.marked = 'marked'
+        for section in session.exam.sections:
+            if section.first_question_number <= question_number <= section.last_question_number:
+                question = section.questions[question_number - section.first_question_number]
 
-            return "", HTTPStatus.OK
+                if question.marked == 'unmarked':
+                    session.marked_count += 1
+                question.marked = 'marked'
 
-    return "", HTTPStatus.BAD_REQUEST
+                back_up_recovery_data()
+                return "", HTTPStatus.OK
+
+        return "", HTTPStatus.BAD_REQUEST
+
+    return "", HTTPStatus.NOT_IMPLEMENTED
 
 
 @app.route('/jee/unmark', methods=['POST'])
 def unmark():
     global session
 
-    form_data = dict(request.get_json(force=True))
-    question_number = int(form_data['question-number'])
+    if session.exam:
 
-    for section in session.exam.sections:
-        if section.first_question_number <= question_number <= section.last_question_number:
-            question = section.questions[question_number - section.first_question_number]
+        form_data = dict(request.get_json(force=True))  # type: ignore
+        question_number = int(form_data['question-number'])
 
-            if question.marked == 'marked':
-                session.marked_count -= 1
-            question.marked = 'unmarked'
+        for section in session.exam.sections:
+            if section.first_question_number <= question_number <= section.last_question_number:
+                question = section.questions[question_number - section.first_question_number]
 
-            return "", HTTPStatus.OK
+                if question.marked == 'marked':
+                    session.marked_count -= 1
+                question.marked = 'unmarked'
 
-    return "", HTTPStatus.BAD_REQUEST
+                back_up_recovery_data()
+                return "", HTTPStatus.OK
+
+        return "", HTTPStatus.BAD_REQUEST
+
+    return "", HTTPStatus.NOT_IMPLEMENTED
 
 @app.route('/jee/receive-value', methods=['POST'])
 def receive_value():
     global session
 
-    form_data = dict(request.get_json(force=True))
-    question_number = int(form_data['question-number'])
-    value = form_data['value']
+    if session.exam:
 
-    for section in session.exam.sections:
-        if section.first_question_number <= question_number <= section.last_question_number:
-            question = section.questions[question_number - section.first_question_number]
-            old_value = question.value
-            question.value = value
+        form_data = dict(request.get_json(force=True))  # type: ignore
+        question_number = int(form_data['question-number'])
+        value = form_data['value']
 
-            if (not old_value) and value:
-                session.answered_count += 1
-                session.unanswered_count -= 1
-                question.answered = 'answered'
+        for section in session.exam.sections:
+            if section.first_question_number <= question_number <= section.last_question_number:
+                question = section.questions[question_number - section.first_question_number]
+                old_value = question.value
+                question.value = value
 
-            if old_value and (not value):
-                session.answered_count -= 1
-                session.unanswered_count += 1
-                question.answered = 'unanswered'
+                if (not old_value) and value:
+                    session.answered_count += 1
+                    session.unanswered_count -= 1
+                    question.answered = 'answered'
 
-            return "", HTTPStatus.OK
+                if old_value and (not value):
+                    session.answered_count -= 1
+                    session.unanswered_count += 1
+                    question.answered = 'unanswered'
 
-    return "", HTTPStatus.BAD_REQUEST
+                back_up_recovery_data()
+                return "", HTTPStatus.OK
 
+        return "", HTTPStatus.BAD_REQUEST
+
+    return "", HTTPStatus.NOT_IMPLEMENTED
+
+@app.route('/jee/quit', methods=['GET'])
+def quit():
+    global session
+
+    if session.exam:
+
+        session.exam = None
+        session.start_time = ""
+        session.outage_time = ""
+        session.answered_count = 0
+        session.unanswered_count = 0
+        session.unvisited_count = 0
+        session.marked_count = 0
+
+        BACKUP_FILE_PATH.unlink(missing_ok=True)
+
+        return redirect('/jee/'), HTTPStatus.TEMPORARY_REDIRECT
+
+    return "You are not in a test session.", HTTPStatus.NOT_IMPLEMENTED
+
+@app.route('/jee/submit', methods=['GET'])
+def submit():
+    global session
+
+    if session.exam:
+        session.end_time = datetime.now(timezone.utc).isoformat()
+
+        with connect(MAIN_DATABASE_PATH) as connection:
+            exam_data = (
+                session.exam.name,
+                session.exam.duration,
+                session.start_time,
+                session.end_time,
+                session.outage_time
+            )
+
+            exam_id: int = connection.execute("""
+                INSERT INTO exams
+                (exam_name, duration, start_time, end_time, outage_delay)
+                VALUES (?, ?, ?, ?, ?)
+                RETURNING exam_id;
+            """, exam_data).fetchone()[0]
+
+            for section in session.exam.sections:
+                section_id: int = connection.execute("""
+                    INSERT INTO sections
+                    (exam_id, section_name, section_type, correct_marks, unattempted_marks, wrong_marks)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                    RETURNING section_id;
+                """, (exam_id, section.name, section.type, section.correct_marks, section.unattempted_marks, section.wrong_marks)).fetchone()[0]
+
+                for question in section.questions:
+                    connection.execute("""
+                        INSERT INTO questions
+                        (section_id, question_number, attempt, marked)
+                        VALUES (?, ?, ?, ?);
+                    """, (section_id, question.question_number, question.value, question.marked))
+
+        connection.close()
+
+        
+        session.exam = None
+        session.start_time = ""
+        session.outage_time = ""
+        session.answered_count = 0
+        session.unanswered_count = 0
+        session.unvisited_count = 0
+        session.marked_count = 0
+
+        BACKUP_FILE_PATH.unlink(missing_ok=True)
+
+        return redirect('/jee/submitted'), HTTPStatus.TEMPORARY_REDIRECT
+
+    return "You are not in a test session.", HTTPStatus.NOT_IMPLEMENTED
+
+@app.route('/jee/submitted', methods=['GET'])
+def submitted():
+    return render_template('submitted.html'), HTTPStatus.OK
+
+@app.route('/jee/download', methods=['GET'])
+def download():
+    return render_template('download.html'), HTTPStatus.OK
+
+@app.route('/jee/download/exams', methods=['GET'])
+def download_exams():
+    csv_path = create_csv_from_db('exams')
+    file = send_file(csv_path)
+    csv_path.unlink(missing_ok=True)
+    return file, HTTPStatus.OK
+
+
+@app.route('/jee/download/sections', methods=['GET'])
+def download_sections():
+    csv_path = create_csv_from_db('sections')
+    file = send_file(csv_path)
+    csv_path.unlink(missing_ok=True)
+    return file, HTTPStatus.OK
+
+
+@app.route('/jee/download/questions', methods=['GET'])
+def download_questions():
+    csv_path = create_csv_from_db('questions')
+    file = send_file(csv_path)
+    csv_path.unlink(missing_ok=True)
+    return file, HTTPStatus.OK
         
 def main():
     global SERVER_MODE
 
     create_file_system()
+    restore_recovery_data()
 
     app.run()
 

@@ -1,4 +1,4 @@
-let time_remaining = new Date(`${time_remaining_string}Z`);
+let time_remaining = new Date(time_remaining_string);
 
 // Used internally
 function post(url, data = null) {
@@ -113,7 +113,7 @@ function clear_numeric(question_number) {
 
 function init() {
     if (timer_type != "Untimed Test") {
-        time_remaining = new Date(`${time_remaining_string}Z`);
+        time_remaining = new Date(time_remaining_string);
         clock();
         setInterval(clock, 1000);
     }
