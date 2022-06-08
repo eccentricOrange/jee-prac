@@ -50,8 +50,7 @@ def restore_recovery_data():
         with open(BACKUP_FILE_PATH, 'r') as backup_file:
             session.from_dict(load(backup_file))
 
-            session.outage_time = (datetime.fromisoformat(session.outage_time) + (datetime.now(timezone.utc) - datetime.fromisoformat(session.last_known_time))).isoformat()
-            print(session.outage_time)
+            session.outage_time = (datetime.fromisoformat(session.outage_time).replace(tzinfo=timezone.utc) + (datetime.now(timezone.utc).replace(tzinfo=timezone.utc) - datetime.fromisoformat(session.last_known_time).replace(tzinfo=timezone.utc))).isoformat()
 
 def get_sections_from_form(form_data):
     exam_section_number = 0
@@ -236,10 +235,10 @@ def get_question():
                     question.visited = "visited"
 
                 if session.exam.timing_type != "untimed":
-                    duration = datetime.fromtimestamp(session.exam.duration * 60).replace(tzinfo=timezone.utc)
+                    duration = datetime.utcfromtimestamp(session.exam.duration * 60).replace(tzinfo=timezone.utc)
                     now = datetime.now(timezone.utc)
-                    start_time = datetime.fromisoformat(session.start_time)
-                    outage_time = datetime.fromisoformat(session.outage_time)
+                    start_time = datetime.fromisoformat(session.start_time).replace(tzinfo=timezone.utc)
+                    outage_time = datetime.fromisoformat(session.outage_time).replace(tzinfo=timezone.utc)
                     time_remaining = duration - (now - start_time) + timedelta(seconds=outage_time.timestamp())
                     time_remaining_string = time_remaining.replace(tzinfo=timezone.utc).isoformat()
                     timer_type = "Time Remaining:"
@@ -475,7 +474,12 @@ def main():
     create_file_system()
     restore_recovery_data()
 
-    app.run()
+    host = '0.0.0.0' if SERVER_MODE else '127.0.0.1'
+    port = 80 if SERVER_MODE else 5000
+
+    print(f'Visit http://{host}:{port}/jee to begin.\n')
+
+    app.run(host=host, port=port)
 
 if __name__ == '__main__':
     main()
