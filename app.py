@@ -129,7 +129,7 @@ def select_test_type():
 
 @app.route('/jee/configure-test/', methods=['GET', 'POST'])
 def configure_test():
-    if not session.exam:
+    if not session.start_time:
         return render_template('configure-test.html'), HTTPStatus.OK
 
     return "You are already in a test session.", HTTPStatus.IM_USED
@@ -166,6 +166,7 @@ def receive_test_type():
 
             exam.timing_type = form_data['timing-type']
             exam.duration = int(form_data['duration']) if exam.timing_type == 'custom-time' else 0
+            session.exam = exam
             return redirect('/jee/configure-test'), HTTPStatus.TEMPORARY_REDIRECT
 
         return "", HTTPStatus.BAD_REQUEST
@@ -178,22 +179,23 @@ def receive_test_config():
     global session
 
     if not session.exam:
-        exam = Exam()
+        return "", HTTPStatus.NOT_IMPLEMENTED
 
-        if request.method == 'POST':
-            form_data = request.form
-            
-            if 'exam-name' in form_data:
-                exam.name = form_data['exam-name']
+    exam: Exam = session.exam  # type: ignore
 
-            exam.sections = list(get_sections_from_form(form_data))
+    if request.method == 'POST':
+        form_data = request.form
+        
+        if 'exam-name' in form_data:
+            exam.name = form_data['exam-name']
 
-            session.exam = exam
-            return redirect('/jee/start-test'), HTTPStatus.TEMPORARY_REDIRECT
+        exam.sections = list(get_sections_from_form(form_data))
 
-        return '', HTTPStatus.BAD_REQUEST
+        session.exam = exam
+        return redirect('/jee/start-test'), HTTPStatus.TEMPORARY_REDIRECT
 
-    return "You are already in a test session.", HTTPStatus.IM_USED
+    return '', HTTPStatus.BAD_REQUEST
+
 
 
 @app.route('/jee/start-test', methods=['GET', 'POST'])

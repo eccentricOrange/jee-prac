@@ -58,16 +58,16 @@ function get_new_section(section_number) {
     mcq_options_input.setAttribute("required", "");
 
     var mcq_options_option_A = document.createElement("option");
-    mcq_options_option_A.setAttribute("value", "A");
-    mcq_options_option_A.innerHTML = "A";
+    mcq_options_option_A.setAttribute("value", "A,B,C,D");
+    mcq_options_option_A.innerHTML = "A,B,C,D";
 
     var mcq_options_option_a = document.createElement("option");
-    mcq_options_option_a.setAttribute("value", "a");
-    mcq_options_option_a.innerHTML = "a";
+    mcq_options_option_a.setAttribute("value", "a,b,c,d");
+    mcq_options_option_a.innerHTML = "a,b,c,d";
 
     var mcq_options_option_1 = document.createElement("option");
-    mcq_options_option_1.setAttribute("value", "1");
-    mcq_options_option_1.innerHTML = "1";
+    mcq_options_option_1.setAttribute("value", "1,2,3,4");
+    mcq_options_option_1.innerHTML = "1,2,3,4";
 
     mcq_options_input.appendChild(mcq_options_option_A);
     mcq_options_input.appendChild(mcq_options_option_a);

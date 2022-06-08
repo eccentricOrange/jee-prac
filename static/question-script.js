@@ -95,7 +95,7 @@ function clear_mcq(question_number) {
     mcq_store_value(question_number);
 }
 
-function numeric_store_value(question_number) {
+function field_store_value(question_number) {
     const control_value = document.getElementById('question').value;
     const answered = !((control_value == null) || (control_value == '') || (control_value == undefined));
     const value = answered ? control_value : "";
@@ -103,12 +103,12 @@ function numeric_store_value(question_number) {
     update_answered_count_and_button_state(question_number, answered);
 }
 
-function clear_numeric(question_number) {
+function clear_field(question_number) {
     const control_value = document.getElementById('question');
     if (control_value) {
         control_value.value = '';
     }
-    numeric_store_value(question_number);
+    field_store_value(question_number);
 }
 
 function init() {
