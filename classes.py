@@ -103,6 +103,9 @@ class Exam:
         self.sections = [Section().from_dict(section)
                          for section in data["sections"]]
 
+        if "timing-type" in data:
+            self.timing_type = data["timing-type"]
+
         return self
 
 
