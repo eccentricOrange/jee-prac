@@ -113,7 +113,9 @@ def create_csv_from_db(table_name: str) -> Path:
 
 @app.route('/jee/', methods=['GET', 'POST'])
 def select_test_type():
-    if not session.exam:
+    if not session.start_time:
+
+        session.exam = None
 
         with open(TEMPLATE_TESTS_PATH, 'r') as template_tests_file:
             template_tests = load(template_tests_file)
@@ -138,7 +140,7 @@ def configure_test():
 def receive_test_type():
     global session
     
-    if not session.exam:
+    if not session.start_time:
         exam = Exam()
 
         if request.method == 'POST':
@@ -217,7 +219,7 @@ def start_test():
 def get_question():
     global session
 
-    if session.exam:
+    if session.start_time:
         
         question_number = int(request.args.get('question-number'))  # type: ignore
 
@@ -284,7 +286,7 @@ def get_question():
 def mark():
     global session
 
-    if session.exam:
+    if session.start_time:
 
         form_data = dict(request.get_json(force=True))  # type: ignore
         question_number = int(form_data['question-number'])
@@ -309,7 +311,7 @@ def mark():
 def unmark():
     global session
 
-    if session.exam:
+    if session.start_time:
 
         form_data = dict(request.get_json(force=True))  # type: ignore
         question_number = int(form_data['question-number'])
@@ -366,7 +368,7 @@ def receive_value():
 def quit():
     global session
 
-    if session.exam:
+    if session.start_time:
 
         session.exam = None
         session.start_time = ""
@@ -386,7 +388,7 @@ def quit():
 def submit():
     global session
 
-    if session.exam:
+    if session.start_time:
         session.end_time = datetime.now(timezone.utc).isoformat()
 
         with connect(MAIN_DATABASE_PATH) as connection:
