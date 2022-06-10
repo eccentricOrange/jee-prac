@@ -93,7 +93,8 @@ class Exam:
             "exam-code": self.exam_code,
             "duration": self.duration,
             "timing-type": self.timing_type,
-            "sections": [section.to_dict() for section in self.sections]
+            "sections": [section.to_dict() for section in self.sections],
+            "total-number-of-questions": self.total_number_of_questions
         }
 
     def from_dict(self, data: dict):
@@ -105,6 +106,9 @@ class Exam:
 
         if "timing-type" in data:
             self.timing_type = data["timing-type"]
+
+        if "total-number-of-questions" in data:
+            self.total_number_of_questions = data["total-number-of-questions"]
 
         return self
 

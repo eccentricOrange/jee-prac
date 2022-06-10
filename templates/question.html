@@ -94,17 +94,13 @@
             class="control"
             id="previous"
             onclick="go_to_previous_question({{ data['question-number'] }})"
-            {{
-            previous_question_disabled
-            }}>
+            {{ data['previous-question-disabled'] }}>
         <input type="button"
             value="Next"
             class="control"
             id="next"
             onclick="go_to_next_question({{ data['question-number'] }})"
-            {{
-            next_question_disabled
-            }}>
+            {{ data['next-question-disabled'] }}>
         <input type="button"
             value="{{ data['mark-button-text'] }}"
             class="control"
