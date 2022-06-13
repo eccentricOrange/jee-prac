@@ -41,13 +41,10 @@
 				"GitHub.remotehub",
 				"ms-vscode-remote.vscode-remote-extensionpack",
 				"ms-vscode.remote-repositories",
-				"redhat.vscode-yaml",
 				"mtxr.sqltools-driver-sqlite",
 				"streetsidesoftware.code-spell-checker",
 				"ms-azuretools.vscode-docker",
-				"cschleiden.vscode-github-actions",
 				"github.vscode-pull-request-github",
-				"wholroyd.jinja",
 				"GitHub.copilot",
 				"visualstudioexptteam.vscodeintellicode"
 			]
