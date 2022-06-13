@@ -46,7 +46,8 @@
 				"ms-azuretools.vscode-docker",
 				"github.vscode-pull-request-github",
 				"GitHub.copilot",
-				"visualstudioexptteam.vscodeintellicode"
+				"visualstudioexptteam.vscodeintellicode",
+                "wholroyd.jinja"
 			]
 		}
 	},
