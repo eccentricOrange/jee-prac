@@ -276,7 +276,7 @@ def get_question():
                     data['choices'] = choices
 
                 back_up_recovery_data()
-                return render_template(f'{section.type}.html', data=data), HTTPStatus.OK
+                return render_template(f'{section.type}.html'.lower(), data=data), HTTPStatus.OK
 
         return "", HTTPStatus.BAD_REQUEST
 
