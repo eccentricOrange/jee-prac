@@ -275,6 +275,9 @@ def get_question():
 
                     data['choices'] = choices
 
+                else:
+                    data['value'] = question.value
+
                 back_up_recovery_data()
                 return render_template(f'{section.type}.html'.lower(), data=data), HTTPStatus.OK
 
