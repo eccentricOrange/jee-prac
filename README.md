@@ -4,7 +4,9 @@ This application provides you a way to practice for Computer-based Tests (CBT) i
 
 The functionality is provided as a browser-based Flask application that runs locally on your own machine.
 
-**This project is not affiliated with NTA, VIT, IIIT, or any of the entities whose test paper patterns are used here, in any way, shape, or form.**
+### Notes
+* **This project is not affiliated with NTA, VIT, IIIT, or any of the entities whose test paper patterns are used here, in any way, shape, or form.**
+* **This project is not yet at v1.0, and has not been vetted by experts. Please do not use it is an example for learning software development techniques.**
 
 ## Key concepts
 * You can sit one **test**/**exam** at a time.
