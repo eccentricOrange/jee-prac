@@ -1,25 +1,26 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
-// https://github.com/microsoft/vscode-dev-containers/tree/v0.236.0/containers/python-3
+// https://github.com/microsoft/vscode-dev-containers/tree/v0.238.0/containers/python-3
 {
 	"name": "Python 3",
 	"build": {
 		"dockerfile": "Dockerfile",
 		"context": "..",
-		"args": {
+		"args": { 
 			// Update 'VARIANT' to pick a Python version: 3, 3.10, 3.9, 3.8, 3.7, 3.6
 			// Append -bullseye or -buster to pin to an OS version.
 			// Use -bullseye variants on local on arm64/Apple Silicon.
 			"VARIANT": "3.10-bullseye",
 			// Options
-			"NODE_VERSION": "lts/*"
+			"NODE_VERSION": "none"
 		}
 	},
+
 	// Configure tool-specific properties.
 	"customizations": {
 		// Configure properties specific to VS Code.
 		"vscode": {
 			// Set *default* container specific settings.json values on container create.
-			"settings": {
+			"settings": { 
 				"python.defaultInterpreterPath": "/usr/local/bin/python",
 				"python.linting.enabled": true,
 				"python.linting.pylintEnabled": true,
@@ -33,35 +34,31 @@
 				"python.linting.pydocstylePath": "/usr/local/py-utils/bin/pydocstyle",
 				"python.linting.pylintPath": "/usr/local/py-utils/bin/pylint"
 			},
+			
 			// Add the IDs of extensions you want installed when the container is created.
 			"extensions": [
 				"ms-python.python",
 				"ms-python.vscode-pylance",
-				"GitHub.codespaces",
-				"GitHub.remotehub",
-				"ms-vscode-remote.vscode-remote-extensionpack",
-				"ms-vscode.remote-repositories",
-				"mtxr.sqltools-driver-sqlite",
-				"streetsidesoftware.code-spell-checker",
-				"ms-azuretools.vscode-docker",
-				"github.vscode-pull-request-github",
 				"GitHub.copilot",
-				"visualstudioexptteam.vscodeintellicode",
-                "wholroyd.jinja",
-				"mutantdino.resourcemonitor"
+				"GitHub.vscode-pull-request-github",
+				"VisualStudioExptTeam.vscodeintellicode",
+				"wholroyd.jinja",
+				"mutantdino.resourcemonitor",
+				"mtxr.sqltools",
+				"mtxr.sqltools-driver-sqlite"
 			]
 		}
 	},
+
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
+
 	// Use 'postCreateCommand' to run commands after the container is created.
 	"postCreateCommand": "pip3 install --user -r requirements.txt",
+
 	// Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
 	"remoteUser": "vscode",
 	"features": {
-		"docker-in-docker": "latest",
-		"git": "os-provided",
-		"github-cli": "latest",
-		"jupyterlab": "latest"
+		"git": "os-provided"
 	}
 }
