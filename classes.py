@@ -76,7 +76,7 @@ class Question:
         return self
 
     def from_dict(self, data: dict):
-        self = self.from_dict_generic(data)
+        self.from_dict_generic(data)
 
         if "attempts" in data:
             self.attempts = data["attempts"]
@@ -99,14 +99,11 @@ class TextQuestion(Question):
     attempts: str = ""
 
 
-class MCQSCC(Question):
+class MCQ(Question):
     """
     defines a multiple choice question
-    - only one of the possible choices can be correct
     """
 
-    answers: str = ""
-    attempts: str = ""
     choices = ('A', 'B', 'C', 'D')
 
     def to_dict(self):
@@ -123,7 +120,7 @@ class MCQSCC(Question):
         return return_data
 
     def from_dict(self, data: dict):
-        self = self.from_dict_generic(data)
+        self.from_dict_generic(data)
 
         if "attempts" in data:
             self.attempts = data["attempts"]
@@ -137,7 +134,17 @@ class MCQSCC(Question):
         return self
 
 
-class MCQMCC(Question):
+class MCQSCC(MCQ):
+    """
+    defines a multiple choice question
+    - only one of the possible choices can be correct
+    """
+
+    answers: str = ""
+    attempts: str = ""
+
+
+class MCQMCC(MCQ):
     """
     defines a multiple choice question
     - multiple correct choices can be correct
@@ -145,7 +152,6 @@ class MCQMCC(Question):
 
     answers: tuple[str] = tuple("")
     attempts: tuple[str] = tuple("")
-    choices = ('A', 'B', 'C', 'D')
 
     def mark_mcq_mcc(self, wrong: float, correct: float, unattempted: float = 0) -> float:
         """
@@ -186,30 +192,3 @@ class MCQMCC(Question):
 
         # if unattempted, return unattempted marks
         return unattempted
-
-    def to_dict(self):
-        return_data = self.to_dict_generic()
-
-        if self.attempts:
-            return_data["attempts"] = list(self.attempts)
-
-        if self.answers:
-            return_data["answers"] = list(self.answers)
-
-        return_data["choices"] = list(self.choices)
-
-        return return_data
-
-    def from_dict(self, data: dict):
-        self = self.from_dict_generic(data)
-
-        if "attempts" in data:
-            self.attempts = tuple(data["attempts"])
-
-        if "answers" in data:
-            self.answers = tuple(data["answers"])
-
-        if "choices" in data:
-            self.choices = tuple(data["choices"])
-
-        return self
