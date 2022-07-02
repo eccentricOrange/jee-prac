@@ -192,3 +192,92 @@ class MCQMCC(MCQ):
 
         # if unattempted, return unattempted marks
         return unattempted
+
+
+class Section:
+    number_of_questions: int = 0
+    first_question_number: int = 1
+    last_question_number: int = -1
+
+    correct_marks: float = 0.0
+    wrong_marks: float = 0.0
+    unattempted_marks: float = 0.0
+
+    name: str = ""
+    questions_type: str = ""
+    section_number: int = 0
+
+    questions: list[Question] = []
+
+
+    def to_dict(self):
+        return_data = {
+            "number-of-questions": self.number_of_questions,
+            "first-question-number": self.first_question_number,
+            "last-question-number": self.last_question_number,
+            "correct-marks": self.correct_marks,
+            "wrong-marks": self.wrong_marks,
+            "unattempted-marks": self.unattempted_marks,
+            "name": self.name,
+            "questions-type": self.questions_type,
+            "section-number": self.section_number,
+            "questions": [question.to_dict() for question in self.questions]
+        }
+
+        return return_data
+
+    def from_dict(self, data: dict):
+        self.number_of_questions = data["number-of-questions"]
+        self.correct_marks = data["correct-marks"]
+        self.wrong_marks = data["wrong-marks"]
+        self.unattempted_marks = data["unattempted-marks"]
+        self.name = data["name"]
+        self.questions_type = data["questions-type"]
+        self.section_number = data["section-number"]
+
+        return self
+
+    
+    def from_bkp_dict(self, data: dict):
+        self.from_dict(data)
+        self.first_question_number = data["first-question-number"]
+        self.last_question_number = data["last-question-number"]
+        self.questions = [Question().from_dict(question) for question in data["questions"]]
+
+        return self
+
+
+class Exam:
+    name: str = ""
+    exam_code: str = ""
+    duration: int = 0
+    timing_type: str = ""
+    total_number_of_questions: int = 0
+    sections: list[Section] = []
+
+    def to_dict(self):
+        return_data = {
+            "name": self.name,
+            "exam-code": self.exam_code,
+            "duration": self.duration,
+            "timing-type": self.timing_type,
+            "total-number-of-questions": self.total_number_of_questions,
+            "sections": [section.to_dict() for section in self.sections]
+        }
+
+        return return_data
+
+    def from_dict(self, data: dict):
+        self.name = data["name"]
+        self.exam_code = data["exam-code"]
+        self.duration = data["duration"]
+        self.timing_type = data["timing-type"]
+
+        return self
+
+    def from_bkp_dict(self, data: dict):
+        self.from_dict(data)
+        self.total_number_of_questions = data["total-number-of-questions"]
+        self.sections = [Section().from_bkp_dict(section) for section in data["sections"]]
+
+        return self
