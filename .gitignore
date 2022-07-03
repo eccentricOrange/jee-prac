@@ -2,7 +2,9 @@ __pycache__
 .python-version
 exp*
 .vscode
+.docker
 .env
+.flaskenv
 data/*
 !data/schema.sql
 !data/preconfigured-exams.json

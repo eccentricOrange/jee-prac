@@ -1,3 +1,4 @@
+from __future__ import annotations
 """
 classes for various parts of a session
 - `Question` is for one question. Child classes define the type of question
@@ -8,7 +9,6 @@ classes for various parts of a session
 
 
 from collections import Counter
-from __future__ import annotations
 from typing import Type
 
 
