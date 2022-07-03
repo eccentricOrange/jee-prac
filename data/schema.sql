@@ -22,5 +22,7 @@ CREATE TABLE IF NOT EXISTS questions (
     section_id INTEGER NOT NULL REFERENCES sections(section_id),
     question_number INTEGER NOT NULL,
     attempt TEXT NOT NULL,
+    answer TEXT NOT NULL,
+    score REAL NOT NULL,
     marked INTEGER NOT NULL
 );

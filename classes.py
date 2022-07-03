@@ -1,28 +1,36 @@
 """
-algorithms for questions
-- `Question` defines a generic question
-- each class defines one kind of question, inheriting from `Question`
-- each class has a marking function
-  - it will accept data about the marking system, the attempt(s), and the correct answer(s)
-  - it will return the marks scored
+classes for various parts of a session
+- `Question` is for one question. Child classes define the type of question
+- `Section` is for one section of an exam. It has one or more questions
+- `Exam` is for the entire exam. It has one or more sections
+- `Session` is for the entire session. It has one exam, and additional state data
 """
 
 
 from collections import Counter
+from __future__ import annotations
+from typing import Type
 
 
 class Question:
-    """defines a generic question"""
+    """
+    defines a generic question
+     - `Question` defines a generic question
+     - each class defines one kind of question, inheriting from `Question`
+     - each class has a marking function
+     - it will accept data about the marking system, the attempt(s), and the correct answer(s)
+     - it will return the marks scored
+  """
 
     question_number: int = 0
     attempts: None | str | float | tuple[str] = None
     answers: None | str | float | tuple[str] = None
-    marks: float = 0.0
+    score: float = 0.0
     visited = "unvisited"
     marked = "unmarked"
     answered = "unanswered"
 
-    def mark(self, wrong: float, correct: float, unattempted: float = 0):
+    def mark(self, wrong: float, correct: float, unattempted: float = 0) -> float:
         """
         mark a generic question
         - correct if `answer == attempt`
@@ -40,7 +48,13 @@ class Question:
 
         return unattempted
 
-    def to_dict_generic(self):
+    def to_dict_generic(self) -> dict:
+        """
+        convert some data about the question to a dictionary
+        - these data will always be exported
+        - specific data will be exported by each particular question child class
+        """
+
         return_data = {
             "question-number": self.question_number,
             "visited": self.visited,
@@ -48,12 +62,18 @@ class Question:
             "answered": self.answered
         }
 
-        if self.marks:
-            return_data["marks"] = self.marks
+        if self.score:
+            return_data["score"] = self.score
 
         return return_data
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
+        """
+        convert more specific data about the question to a dictionary
+        - many question child classes will export this data
+        - a question child class may override this method to export different specific data
+        """
+
         return_data = self.to_dict_generic()
 
         if self.attempts:
@@ -64,18 +84,30 @@ class Question:
 
         return return_data
 
-    def from_dict_generic(self, data: dict):
+    def from_dict_generic(self, data: dict) -> Question:
+        """
+        convert some data about the question from a dictionary
+        - these data will always be imported
+        - specific data will be imported by each particular question child class
+        """
+
         self.question_number = data["question-number"]
         self.visited = data["visited"]
         self.marked = data["marked"]
         self.answered = data["answered"]
 
-        if "marks" in data:
-            self.marks = data["marks"]
+        if "score" in data:
+            self.score = data["score"]
 
         return self
 
-    def from_dict(self, data: dict):
+    def from_dict(self, data: dict) -> Question:
+        """
+        convert more specific data about the question from a dictionary
+        - many question child classes will import this data
+        - a question child class may override this method to import different specific data
+        """
+
         self.from_dict_generic(data)
 
         if "attempts" in data:
@@ -106,7 +138,12 @@ class MCQ(Question):
 
     choices = ('A', 'B', 'C', 'D')
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
+        """
+        convert specific data about MCQ-style questions to a dictionary
+        - adds the conversion for `choices`
+        """
+
         return_data = self.to_dict_generic()
 
         if self.attempts:
@@ -119,7 +156,12 @@ class MCQ(Question):
 
         return return_data
 
-    def from_dict(self, data: dict):
+    def from_dict(self, data: dict) -> Question:
+        """
+        convert specific data about MCQ-style questions from a dictionary
+        - adds the conversion for `choices`
+        """
+
         self.from_dict_generic(data)
 
         if "attempts" in data:
@@ -195,6 +237,12 @@ class MCQMCC(MCQ):
 
 
 class Section:
+    """
+    defines a section of a test
+    - a section is a collection of questions
+    - all questions in a section must be of the same type
+    """
+
     number_of_questions: int = 0
     first_question_number: int = 1
     last_question_number: int = -1
@@ -207,10 +255,12 @@ class Section:
     questions_type: str = ""
     section_number: int = 0
 
+    choices: tuple[str] = tuple("")
     questions: list[Question] = []
 
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
+        """convert data about the section to a dictionary"""
         return_data = {
             "number-of-questions": self.number_of_questions,
             "first-question-number": self.first_question_number,
@@ -224,9 +274,18 @@ class Section:
             "questions": [question.to_dict() for question in self.questions]
         }
 
+        if self.choices:
+            return_data["choices"] = list(self.choices)
+
         return return_data
 
-    def from_dict(self, data: dict):
+    def from_dict(self, data: dict) -> Section:
+        """
+        convert generic data about the section from a dictionary
+        - these data will always be imported
+        - specific data will be imported by `from_bkp_dict` only when restoring a session from a backup
+        """
+
         self.number_of_questions = data["number-of-questions"]
         self.correct_marks = data["correct-marks"]
         self.wrong_marks = data["wrong-marks"]
@@ -235,19 +294,32 @@ class Section:
         self.questions_type = data["questions-type"]
         self.section_number = data["section-number"]
 
+        if "choices" in data:
+            self.choices = data["choices"]
+
         return self
 
     
-    def from_bkp_dict(self, data: dict):
+    def from_bkp_dict(self, data: dict) -> Section:
+        """convert specific data about the section from a dictionary when restoring a session from a backup"""
+
         self.from_dict(data)
         self.first_question_number = data["first-question-number"]
         self.last_question_number = data["last-question-number"]
         self.questions = [Question().from_dict(question) for question in data["questions"]]
 
+        if "choices" in data:
+            self.choices = data["choices"]
+
         return self
 
 
 class Exam:
+    """
+    defines an exam
+    - an exam is a collection of sections
+    """
+
     name: str = ""
     exam_code: str = ""
     duration: int = 0
@@ -255,7 +327,7 @@ class Exam:
     total_number_of_questions: int = 0
     sections: list[Section] = []
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         return_data = {
             "name": self.name,
             "exam-code": self.exam_code,
@@ -267,7 +339,7 @@ class Exam:
 
         return return_data
 
-    def from_dict(self, data: dict):
+    def from_dict(self, data: dict) -> Exam:
         self.name = data["name"]
         self.exam_code = data["exam-code"]
         self.duration = data["duration"]
@@ -275,9 +347,68 @@ class Exam:
 
         return self
 
-    def from_bkp_dict(self, data: dict):
+    def from_bkp_dict(self, data: dict) -> Exam:
         self.from_dict(data)
         self.total_number_of_questions = data["total-number-of-questions"]
         self.sections = [Section().from_bkp_dict(section) for section in data["sections"]]
 
         return self
+
+
+class Session:
+    """
+    defines a session
+    - a session has one exam
+    - contains additional state data
+    """
+    exam: Exam = None  # type: ignore
+    answered_count: int = 0
+    unanswered_count: int = 0
+    marked_count: int = 0
+    unvisited_count: int = 0
+    start_time: str = ""
+    end_time: str = ""
+    outage_time: str = ""
+    last_known_time: str = ""
+
+    def to_dict(self) -> dict:
+        """convert data about the session to a dictionary"""
+
+        return_data = {
+            "exam": self.exam.to_dict(),
+            "answered-count": self.answered_count,
+            "unanswered-count": self.unanswered_count,
+            "marked-count": self.marked_count,
+            "unvisited-count": self.unvisited_count,
+            "start-time": self.start_time,
+            "end-time": self.end_time,
+            "outage-time": self.outage_time,
+            "last-known-time": self.last_known_time
+        }
+
+        return return_data
+
+    def from_dict(self, data: dict) -> Session:
+        """restore data about the session from a dictionary"""
+
+        self.exam = Exam().from_dict(data["exam"])
+        self.answered_count = data["answered-count"]
+        self.unanswered_count = data["unanswered-count"]
+        self.marked_count = data["marked-count"]
+        self.unvisited_count = data["unvisited-count"]
+        self.start_time = data["start-time"]
+        self.end_time = data["end-time"]
+        self.outage_time = data["outage-time"]
+        self.last_known_time = data["last-known-time"]
+
+        return self
+
+
+ASSOCIATIONS: dict[str, Type[Question]] = {
+    'generic': Question,
+    'numeric': NumericQuestion,
+    'text': TextQuestion,
+    'mcq': MCQ,
+    'mcq-scc': MCQSCC,
+    'mcq-mcc': MCQMCC
+}
