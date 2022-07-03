@@ -5,7 +5,7 @@
         "sections": [
             {
                 "number-of-questions": 20,
-                "options": [
+                "choices": [
                     "1",
                     "2",
                     "3",
@@ -14,10 +14,10 @@
                 "correct-marks": 4,
                 "unattempted-marks": 0,
                 "wrong-marks": -1,
-                "name": "Physics MCQ",
-                "type": "mcq",
+                "name": "Physics MCQ (Single Choice Correct)",
+                "type": "mcq-scc",
                 "section-number": 1,
-                "section-name": "physics-mcq"
+                "section-name": "physics-mcq-scc"
             },
             {
                 "number-of-questions": 5,
@@ -31,7 +31,7 @@
             },
             {
                 "number-of-questions": 20,
-                "options": [
+                "choices": [
                     "1",
                     "2",
                     "3",
@@ -40,10 +40,10 @@
                 "correct-marks": 4,
                 "unattempted-marks": 0,
                 "wrong-marks": -1,
-                "name": "Chemistry MCQ",
-                "type": "mcq",
+                "name": "Chemistry MCQ (Single Choice Correct)",
+                "type": "mcq-scc",
                 "section-number": 3,
-                "section-name": "chemistry-mcq"
+                "section-name": "chemistry-mcq-scc"
             },
             {
                 "number-of-questions": 5,
@@ -57,7 +57,7 @@
             },
             {
                 "number-of-questions": 20,
-                "options": [
+                "choices": [
                     "1",
                     "2",
                     "3",
@@ -66,10 +66,10 @@
                 "correct-marks": 4,
                 "unattempted-marks": 0,
                 "wrong-marks": -1,
-                "name": "Mathematics MCQ",
-                "type": "mcq",
+                "name": "Mathematics MCQ (Single Choice Correct)",
+                "type": "mcq-scc",
                 "section-number": 5,
-                "section-name": "mathematics-mcq"
+                "section-name": "mathematics-mcq-scc"
             },
             {
                 "number-of-questions": 5,
@@ -90,7 +90,7 @@
         "sections": [
             {
                 "number-of-questions": 30,
-                "options": [
+                "choices": [
                     "1",
                     "2",
                     "3",
@@ -99,14 +99,14 @@
                 "correct-marks": 4,
                 "unattempted-marks": 0,
                 "wrong-marks": -1,
-                "name": "Physics MCQ",
-                "type": "mcq",
+                "name": "Physics MCQ (Single Choice Correct)",
+                "type": "mcq-scc",
                 "section-number": 1,
-                "section-name": "physics-mcq"
+                "section-name": "physics-mcq-scc"
             },
             {
                 "number-of-questions": 30,
-                "options": [
+                "choices": [
                     "1",
                     "2",
                     "3",
@@ -115,14 +115,14 @@
                 "correct-marks": 4,
                 "unattempted-marks": 0,
                 "wrong-marks": -1,
-                "name": "Chemistry MCQ",
-                "type": "mcq",
+                "name": "Chemistry MCQ (Single Choice Correct)",
+                "type": "mcq-scc",
                 "section-number": 2,
-                "section-name": "chemistry-mcq"
+                "section-name": "chemistry-mcq-scc"
             },
             {
                 "number-of-questions": 30,
-                "options": [
+                "choices": [
                     "1",
                     "2",
                     "3",
@@ -131,10 +131,10 @@
                 "correct-marks": 4,
                 "unattempted-marks": 0,
                 "wrong-marks": -1,
-                "name": "Mathematics MCQ",
-                "type": "mcq",
+                "name": "Mathematics MCQ (Single Choice Correct)",
+                "type": "mcq-scc",
                 "section-number": 3,
-                "section-name": "mathematics-mcq"
+                "section-name": "mathematics-mcq-scc"
             }
         ],
         "exam-code": "jee-mains-old"
@@ -145,7 +145,7 @@
         "sections": [
             {
                 "number-of-questions": 30,
-                "options": [
+                "choices": [
                     "a",
                     "b",
                     "c",
@@ -154,14 +154,14 @@
                 "correct-marks": 3,
                 "unattempted-marks": 0,
                 "wrong-marks": -1,
-                "name": "Physics MCQ",
-                "type": "mcq",
+                "name": "Physics MCQ (Single Choice Correct)",
+                "type": "mcq-scc",
                 "section-number": 1,
-                "section-name": "physics-mcq"
+                "section-name": "physics-mcq-scc"
             },
             {
                 "number-of-questions": 30,
-                "options": [
+                "choices": [
                     "a",
                     "b",
                     "c",
@@ -170,14 +170,14 @@
                 "correct-marks": 3,
                 "unattempted-marks": 0,
                 "wrong-marks": -1,
-                "name": "Chemistry MCQ",
-                "type": "mcq",
+                "name": "Chemistry MCQ (Single Choice Correct)",
+                "type": "mcq-scc",
                 "section-number": 2,
-                "section-name": "chemistry-mcq"
+                "section-name": "chemistry-mcq-scc"
             },
             {
                 "number-of-questions": 10,
-                "options": [
+                "choices": [
                     "a",
                     "b",
                     "c",
@@ -186,14 +186,14 @@
                 "correct-marks": 3,
                 "unattempted-marks": 0,
                 "wrong-marks": -1,
-                "name": "English Proficiency MCQ",
-                "type": "mcq",
+                "name": "English Proficiency MCQ (Single Choice Correct)",
+                "type": "mcq-scc",
                 "section-number": 3,
-                "section-name": "english-proficiency-mcq"
+                "section-name": "english-proficiency-mcq-scc"
             },
             {
                 "number-of-questions": 20,
-                "options": [
+                "choices": [
                     "a",
                     "b",
                     "c",
@@ -202,14 +202,14 @@
                 "correct-marks": 3,
                 "unattempted-marks": 0,
                 "wrong-marks": -1,
-                "name": "Logical Reasoning MCQ",
-                "type": "mcq",
+                "name": "Logical Reasoning MCQ (Single Choice Correct)",
+                "type": "mcq-scc",
                 "section-number": 4,
-                "section-name": "logical-reasoning-mcq"
+                "section-name": "logical-reasoning-mcq-scc"
             },
             {
                 "number-of-questions": 40,
-                "options": [
+                "choices": [
                     "a",
                     "b",
                     "c",
@@ -218,10 +218,10 @@
                 "correct-marks": 3,
                 "unattempted-marks": 0,
                 "wrong-marks": -1,
-                "name": "Mathematics MCQ",
-                "type": "mcq",
+                "name": "Mathematics MCQ (Single Choice Correct)",
+                "type": "mcq-scc",
                 "section-number": 5,
-                "section-name": "mathematics-mcq"
+                "section-name": "mathematics-mcq-scc"
             }
         ],
         "exam-code": "bitsat"
@@ -232,7 +232,7 @@
         "sections": [
             {
                 "number-of-questions": 60,
-                "options": [
+                "choices": [
                     "A",
                     "B",
                     "C",
@@ -241,14 +241,14 @@
                 "correct-marks": 1,
                 "unattempted-marks": 0,
                 "wrong-marks": 0,
-                "name": "Physics MCQ",
-                "type": "mcq",
+                "name": "Physics MCQ (Single Choice Correct)",
+                "type": "mcq-scc",
                 "section-number": 1,
-                "section-name": "physics-mcq"
+                "section-name": "physics-mcq-scc"
             },
             {
                 "number-of-questions": 60,
-                "options": [
+                "choices": [
                     "A",
                     "B",
                     "C",
@@ -257,14 +257,14 @@
                 "correct-marks": 1,
                 "unattempted-marks": 0,
                 "wrong-marks": 0,
-                "name": "Chemistry MCQ",
-                "type": "mcq",
+                "name": "Chemistry MCQ (Single Choice Correct)",
+                "type": "mcq-scc",
                 "section-number": 2,
-                "section-name": "chemistry-mcq"
+                "section-name": "chemistry-mcq-scc"
             },
             {
                 "number-of-questions": 60,
-                "options": [
+                "choices": [
                     "A",
                     "B",
                     "C",
@@ -273,10 +273,10 @@
                 "correct-marks": 1,
                 "unattempted-marks": 0,
                 "wrong-marks": 0,
-                "name": "Mathematics MCQ",
-                "type": "mcq",
+                "name": "Mathematics MCQ (Single Choice Correct)",
+                "type": "mcq-scc",
                 "section-number": 3,
-                "section-name": "mathematics-mcq"
+                "section-name": "mathematics-mcq-scc"
             }
         ],
         "exam-code": "kcet"
@@ -287,7 +287,7 @@
         "sections": [
             {
                 "number-of-questions": 25,
-                "options": [
+                "choices": [
                     "A",
                     "B",
                     "C",
@@ -296,14 +296,14 @@
                 "correct-marks": 1,
                 "unattempted-marks": 0,
                 "wrong-marks": 0,
-                "name": "Physics MCQ",
-                "type": "mcq",
+                "name": "Physics MCQ (Single Choice Correct)",
+                "type": "mcq-scc",
                 "section-number": 1,
-                "section-name": "physics-mcq"
+                "section-name": "physics-mcq-scc"
             },
             {
                 "number-of-questions": 25,
-                "options": [
+                "choices": [
                     "A",
                     "B",
                     "C",
@@ -312,14 +312,14 @@
                 "correct-marks": 1,
                 "unattempted-marks": 0,
                 "wrong-marks": 0,
-                "name": "Chemistry MCQ",
-                "type": "mcq",
+                "name": "Chemistry MCQ (Single Choice Correct)",
+                "type": "mcq-scc",
                 "section-number": 2,
-                "section-name": "chemistry-mcq"
+                "section-name": "chemistry-mcq-scc"
             },
             {
                 "number-of-questions": 25,
-                "options": [
+                "choices": [
                     "A",
                     "B",
                     "C",
@@ -328,14 +328,14 @@
                 "correct-marks": 1,
                 "unattempted-marks": 0,
                 "wrong-marks": 0,
-                "name": "Mathematics MCQ",
-                "type": "mcq",
+                "name": "Mathematics MCQ (Single Choice Correct)",
+                "type": "mcq-scc",
                 "section-number": 3,
-                "section-name": "mathematics-mcq"
+                "section-name": "mathematics-mcq-scc"
             },
             {
                 "number-of-questions": 3,
-                "options": [
+                "choices": [
                     "A",
                     "B",
                     "C",
@@ -344,14 +344,14 @@
                 "correct-marks": 1,
                 "unattempted-marks": 0,
                 "wrong-marks": 0,
-                "name": "Aptitude MCQ",
-                "type": "mcq",
+                "name": "Aptitude MCQ (Single Choice Correct)",
+                "type": "mcq-scc",
                 "section-number": 4,
-                "section-name": "aptitude-mcq"
+                "section-name": "aptitude-mcq-scc"
             },
             {
                 "number-of-questions": 2,
-                "options": [
+                "choices": [
                     "A",
                     "B",
                     "C",
@@ -360,10 +360,10 @@
                 "correct-marks": 1,
                 "unattempted-marks": 0,
                 "wrong-marks": 0,
-                "name": "English MCQ",
-                "type": "mcq",
+                "name": "English MCQ (Single Choice Correct)",
+                "type": "mcq-scc",
                 "section-number": 5,
-                "section-name": "english-mcq"
+                "section-name": "english-mcq-scc"
             }
         ],
         "exam-code": "viteee"
@@ -374,7 +374,7 @@
         "sections": [
             {
                 "number-of-questions": 50,
-                "options": [
+                "choices": [
                     "A",
                     "B",
                     "C",
@@ -383,14 +383,14 @@
                 "correct-marks": 1,
                 "unattempted-marks": 0,
                 "wrong-marks": 0,
-                "name": "SUPR MCQ",
-                "type": "mcq",
+                "name": "SUPR MCQ (Single Choice Correct)",
+                "type": "mcq-scc",
                 "section-number": 1,
-                "section-name": "supr-mcq"
+                "section-name": "supr-mcq-scc"
             },
             {
                 "number-of-questions": 50,
-                "options": [
+                "choices": [
                     "A",
                     "B",
                     "C",
@@ -399,10 +399,10 @@
                 "correct-marks": 2,
                 "unattempted-marks": 0,
                 "wrong-marks": -0.5,
-                "name": "REAP MCQ",
-                "type": "mcq",
+                "name": "REAP MCQ (Single Choice Correct)",
+                "type": "mcq-scc",
                 "section-number": 2,
-                "section-name": "reap-mcq"
+                "section-name": "reap-mcq-scc"
             }
         ],
         "exam-code": "ugee"
