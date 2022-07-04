@@ -1,6 +1,7 @@
 from pathlib import Path
 from sqlite3 import connect, Row
 from classes import Session, Question, MCQ, ASSOCIATIONS
+from json import load
 
 
 def create_file_system(active_directory: Path, main_database_path: Path, template_tests_path: Path, schema_path: Path) -> None:
@@ -65,3 +66,12 @@ def make_questions(session: Session):
     session.exam.total_number_of_questions = question_number - 1
     session.unanswered_count = session.exam.total_number_of_questions
     session.unvisited_count = session.exam.total_number_of_questions
+
+
+def get_pre_configured_tests(template_tests_path: Path) -> list:
+    """
+    get the pre-configured tests from the template tests file
+    """
+
+    with open(template_tests_path, 'r') as template_tests_file:
+        return load(template_tests_file)

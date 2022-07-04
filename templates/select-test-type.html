@@ -1,0 +1,68 @@
+{% extends "layout.html" %}
+
+{% block title %}Select Test Type | JEE Practice{% endblock %}
+
+{% block body %}
+
+<body>
+    <h1>Select Test Type</h1>
+    <ol>
+        <li>Select from one of the available exams or configure your own.</li>
+        <li>Configure the duration of the test.</li>
+        <li>Either start the exam, go back, or exit.</li>
+    </ol>
+
+    <form action="/jee/receive-test-type"
+        method="post"
+        id="select-test-type-form">
+        <fieldset>
+            <legend>Choose an exam type</legend>
+            <select name="test-type"
+                id="test-type"
+                required>
+                {% for test_type in template_tests %}
+                <option value="{{ test_type['exam-code'] }}">
+                    {{ test_type['name'] }}
+                </option>
+                {% endfor %}
+                <option value="custom">[Custom]</option>
+            </select>
+        </fieldset>
+
+        <fieldset>
+            <legend>Duration</legend>
+            <label for="timing-type">Type of timing system</label>
+            <select name="timing-type"
+                id="timing-type"
+                required>
+                <option value="set-time"
+                    id="set-time"
+                    selected>Standard duration</option>
+                <option value="custom-time"
+                    id="custom-time">Custom duration</option>
+                <option value="untimed"
+                    id="untimed">Untimed</option>
+            </select>
+
+            <label for="duration">Duration (in minutes)</label>
+            <input type="number"
+                name="duration"
+                id="duration"
+                value=180
+                disabled />
+
+        </fieldset>
+
+        <input type="reset"
+            value="Reset form"
+            id="reset-form" />
+        <input type="button"
+            value="Back to Home"
+            id="back" />
+        <input type="submit"
+            value="Start test"
+            id="submit-button" />
+    </form>
+    </form>
+</body>
+{% endblock %}

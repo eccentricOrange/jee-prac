@@ -29,6 +29,8 @@ class Question:
     visited = "unvisited"
     marked = "unmarked"
     answered = "unanswered"
+    name = "Question"
+    code = "question"
 
     def mark(self, wrong: float, correct: float, unattempted: float = 0) -> float:
         """
@@ -123,12 +125,16 @@ class NumericQuestion(Question):
     """defines a numeric question"""
     answers: float = 0
     attempts: float = 0
+    name = "Numeric"
+    code = "numeric"
 
 
 class TextQuestion(Question):
     """defines a text question"""
     answers: str = ""
     attempts: str = ""
+    name = "Text"
+    code = "text"
 
 
 class MCQ(Question):
@@ -137,6 +143,8 @@ class MCQ(Question):
     """
 
     choices = ('A', 'B', 'C', 'D')
+    name = "MCQ"
+    code = "mcq"
 
     def to_dict(self) -> dict:
         """
@@ -184,6 +192,8 @@ class MCQSCC(MCQ):
 
     answers: str = ""
     attempts: str = ""
+    name = "MCQ (Single Choice Correct)"
+    code = "mcq-scc"
 
 
 class MCQMCC(MCQ):
@@ -194,6 +204,8 @@ class MCQMCC(MCQ):
 
     answers: tuple[str] = tuple("")
     attempts: tuple[str] = tuple("")
+    name = "MCQ (Multiple Choices Correct)"
+    code = "mcq-mcc"
 
     def mark_mcq_mcc(self, wrong: float, correct: float, unattempted: float = 0) -> float:
         """

@@ -18,13 +18,17 @@ APP_NAME = "jee"
 
 from flask import Flask, redirect, render_template, request, send_file
 app = Flask(__name__)
-session = Session()
 
 @app.route(f"/{APP_NAME}")
 def index():
     return render_template('index.html')
 
+@app.route(f"/{APP_NAME}/select-test-type")
+def select_test_type():
+    return render_template('select-test-type.html', template_tests=algorithms.get_pre_configured_tests(TEMPLATE_TESTS_PATH))
+
 @app.before_first_request
 def init():
     algorithms.create_file_system(ACTIVE_DIRECTORY, MAIN_DATABASE_PATH, TEMPLATE_TESTS_PATH, SCHEMA_PATH)
     print(f'Visit http://{HOST}:{PORT}/{APP_NAME} to begin.\n')
+
