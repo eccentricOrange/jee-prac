@@ -2,7 +2,7 @@ from os import environ
 from pathlib import Path
 import algorithms
 
-from classes import Session
+import classes
 
 DIRECTORY_ENV = environ.get("JEE_PRAC_DIRECTORY")
 HOST = environ.get("JEE_PRAC_HOST")

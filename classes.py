@@ -1,4 +1,3 @@
-from __future__ import annotations
 """
 classes for various parts of a session
 - `Question` is for one question. Child classes define the type of question
@@ -7,6 +6,7 @@ classes for various parts of a session
 - `Session` is for the entire session. It has one exam, and additional state data
 """
 
+from __future__ import annotations
 
 from collections import Counter
 from typing import Type
@@ -270,7 +270,6 @@ class Section:
     choices: tuple[str] = tuple("")
     questions: list[Question] = []
 
-
     def to_dict(self) -> dict:
         """convert data about the section to a dictionary"""
         return_data = {
@@ -311,14 +310,14 @@ class Section:
 
         return self
 
-    
     def from_bkp_dict(self, data: dict) -> Section:
         """convert specific data about the section from a dictionary when restoring a session from a backup"""
 
         self.from_dict(data)
         self.first_question_number = data["first-question-number"]
         self.last_question_number = data["last-question-number"]
-        self.questions = [Question().from_dict(question) for question in data["questions"]]
+        self.questions = [Question().from_dict(question)
+                          for question in data["questions"]]
 
         if "choices" in data:
             self.choices = data["choices"]
@@ -362,7 +361,8 @@ class Exam:
     def from_bkp_dict(self, data: dict) -> Exam:
         self.from_dict(data)
         self.total_number_of_questions = data["total-number-of-questions"]
-        self.sections = [Section().from_bkp_dict(section) for section in data["sections"]]
+        self.sections = [Section().from_bkp_dict(section)
+                         for section in data["sections"]]
 
         return self
 

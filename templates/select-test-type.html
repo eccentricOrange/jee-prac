@@ -16,7 +16,8 @@
         method="post"
         id="select-test-type-form">
         <fieldset>
-            <legend>Choose an exam type</legend>
+            <legend>Exam</legend>
+            <label for="test-type">Test type</label>
             <select name="test-type"
                 id="test-type"
                 required>
@@ -27,6 +28,11 @@
                 {% endfor %}
                 <option value="custom">[Custom]</option>
             </select>
+            <label for="identification">Identifying detail (optional) </label>
+            <input type="text"
+                name="identification"
+                id="identification"
+                placeholder="(e.g. year or session)">
         </fieldset>
 
         <fieldset>
