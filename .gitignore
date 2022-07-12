@@ -6,3 +6,4 @@ exp*
 data/*
 !data/schema.sql
 !data/preconfigured-exams.json
+.flaskenv
